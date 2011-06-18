@@ -28,7 +28,7 @@
 ##
 # Enable a stricter bash script processing to minimize errors in the code.
 ##
-#set -o nounset
+set -o nounset
 set -o errexit
 
 
@@ -61,6 +61,13 @@ MAKE_OPTS="-j2"
 # configuration
 ##
 CONFIG_FILE="/etc/p"
+
+##
+# Variable holding the path to the processed pbuild file. As it is used by plog
+# to identify the execution scope it needs to be initialized in order to not
+# cause an error about an unset variable
+##
+PBUILD=""
 
 ##
 # Print out an error to STDERR
