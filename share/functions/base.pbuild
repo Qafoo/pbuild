@@ -92,7 +92,7 @@ src_install() {
 # You should however not call these tools directly, but use ppear and ppecl.
 #
 # The directory the new php version has been installed to can be reached using
-# ${P} or ${D}, the configuration file is available using ${C}.
+# ${P} or ${D}, the directory searched for the php.ini is available using ${C}.
 #
 # The ${S} variable still points to the source tree, which php has been
 # installed from. This is useful if certain files should be copied over from
@@ -135,5 +135,14 @@ php_enable() {
 php_disable() {
 }
 
+##
+# Uninstall a before installed php version. This phase is usually called a long
+# time after the build process took place, therefore you do not have any access
+# to the build root anymore.
+#
+# However access to the root directory of the PHP installation is provided as
+# ${P} as well as access to the directory holding the configuration file is
+# provided using ${C}.
+##
 php_uninstall() {
 }
