@@ -40,7 +40,7 @@
 # @param target
 ##
 pfetch() {
-    local url=$1
+    local url="$1"
     
     local target=""
     if [ $# -gt 1 ]; then
