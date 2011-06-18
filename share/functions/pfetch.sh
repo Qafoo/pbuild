@@ -49,21 +49,14 @@ pfetch() {
 
     plog "Fetching ${url}"
 
-    # If the target has been specified with a full path to the destination
-    # remove this path prefix, as all the following operations assume the path
-    # is relative to the destination dir.
-    target="$(echo "${target}"|sed -e "s@^$(escapeForRegexp "${D}")@@")"
-
-    # Remove any prefixed slash, as you shouldn't leave the package dir. This
-    # does protect against accidentally leaving the package dir.  However if
-    # the user really wants to be evil, we can't stop him, as he might still
-    # use ../ to get out of the package dir.
-    target="$(echo "${target}"|sed -e 's@^/*@@')"
+    if [ ! -z "${target}" ]; then
+        target="$(makeRelativeTo "${D}" "${target}")"
+    fi
 
     # Check which download util we may utilize
     local CURL=""
     local WGET=""
-
+    
     CURL="$(which "curl")"
     if [ $? -ne 0 ]; then
         WGET="$(which "wget")"

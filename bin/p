@@ -118,6 +118,52 @@ getFirstArgument() {
 }
 
 ##
+# Escape a given string in a way it can be safely used as part of regexp
+# without containing any special meaning. (The regexp delimiters need to be @)
+#
+# @param string
+# @return escaped string
+##
+escapeForRegexp() {
+    echo "$@" | sed -e 's@\(\.\|\@\|\*\|\[\|\]\|\\\)@\\&@g'
+}
+
+##
+# Make the given string relative to the given path
+#
+# To create a relative path the prefixing slash will be removed. Furthermore it
+# will be checked if the string starts with the path (aka. is absolute) in this
+# case the path prefix will be removed.
+#
+# The relative path must exist for this function to work.
+#
+# @param relative
+# @param path
+# @return path
+##
+makeRelativeTo() {
+    local relative="$1"
+    local path="$2"
+
+    pushd "${relative}" >/dev/null
+    
+    local processed="$(readlink -m "${path}")"
+
+    # If the target has been specified with a full path to the destination
+    # remove this path prefix.
+    processed="$(echo "${processed}"|sed -e "s@^$(escapeForRegexp "${relative}")@@")"
+
+    # Remove any prefixed slash to ensure we are inside the target dir. This
+    # may create strange subdir structures, but it will make sure we have
+    # a somewhat relative path.
+    processed="$(echo "${processed}"|sed -e 's@^/*@@')"
+
+    popd >/dev/null
+
+    echo "${processed}"
+}
+
+##
 # Import the configuration file if it does exist.
 ##
 if [ -f "${CONFIG_FILE}" ]; then
@@ -135,8 +181,16 @@ done
 
 ## TODO: Commandline handling
 
-PBUILD=$(findpbuild "$1")
-plog "Using pbuild '${PBUILD}'"
+#PBUILD=$(findpbuild "$1")
+#plog "Using pbuild '${PBUILD}'"
+
+D="/tmp/foo"
+pfetch "http://de.php.net/get/php-5.3.6.tar.bz2/from/this/mirror"
+pfetch "http://de.php.net/get/php-5.3.6.tar.bz2/from/this/mirror" "foo.tar.bz2"
+pfetch "http://de.php.net/get/php-5.3.6.tar.bz2/from/this/mirror" "bar/php-5.3.6.tar.bz2"
+pfetch "http://de.php.net/get/php-5.3.6.tar.bz2/from/this/mirror" "/tmp/foo/blub/php-5.3.6.tar.bz2"
+pfetch "http://de.php.net/get/php-5.3.6.tar.bz2/from/this/mirror" "/tmp/bar/php-5.3.6.tar.bz2"
+
 
 # Close fd 42 again (We want to leave a clean env don't we? ;)
 exec 42>&-
