@@ -119,7 +119,7 @@ for file in ${FUNCTIONS_DIR}/*; do
 done
 
 ##
-# Run the appropriate action
+# Run the appropriate actions
 ##
 
 ## TODO: Commandline handling
