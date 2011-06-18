@@ -118,7 +118,7 @@ if [ -f "${CONFIG_FILE}" ]; then
 fi
 
 # Try to source all the needed functions and the base pbuild template
-for file in ${FUNCTIONS_DIR}/*; do
+for file in "${FUNCTIONS_DIR}"/*; do
     source "${file}"
 done
 
