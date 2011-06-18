@@ -8,7 +8,8 @@
 # the version string is available inside the ${PV} variable
 #
 # The package archive directory for the current pbuild can be accessed using
-# the ${D} variable
+# the ${D} variable. However if pfetch is used the specification of the target
+# directory is not necessary as the fetched files are automatically put there.
 ##
 pkg_fetch() {
 }
