@@ -1,0 +1,168 @@
+##
+# Fetch the php version which should be compiled using this pbuild
+#
+# The fetching process maybe a svn checkout, or the download of a php source
+# archive.
+#
+# If the pbuild follows the recommended naming scheme (php-x.y.z[-buildname])
+# the version string is available inside the ${PV} variable
+#
+# The package archive directory for the current pbuild can be accessed using
+# the ${D} variable. However if pfetch is used the specification of the target
+# directory is not necessary as the fetched files are automatically put there.
+##
+pkg_fetch() {
+    pfetch "http://www.php.net/distributions/php-${PV}.tar.bz2"
+}
+
+##
+# Unpack the fetched php version to its target location for executing the build
+# process
+#
+# The source directory where the download was fetched into during the
+# 'pkg_fetch' phase is available using the ${S} variable. The directory which
+# should be filled with the unpacked code is identified by ${D}.
+#
+# In case of a subversion checkout during the 'pkg_fetch' phase. The contents
+# from ${S} (The checked out code repository) should simply be copied over to
+# ${D} in here.
+#
+pkg_unpack() {
+    punpack "php-${PV}.tar.bz2"
+}
+
+##
+# Execute preparations on the code to be build.
+#
+# Aka. apply patches, run autoconf, …
+#
+# The directory containing the current build src tree is stored in the variable
+# ${S} as well as ${D}, as the source and destination are semantically equal.
+##
+src_prepare() {
+    # Nothing to be done here by default
+    :
+}
+
+##
+# Configure the php version before the compile phase
+#
+# The directory containing the possible patched source tree from the
+# 'src_prepare' phase is accessible using ${S} as well as ${D}.
+#
+# Instead of calling configure directly the 'pconfigure' function needs to be
+# used, as the configure call is slightly modified to contain the correct
+# install prefix, as well as configuration directories and buildtype
+# configuration (cgi, cli, …)
+##
+src_configure() {
+    pconfigure
+}
+
+##
+# Take the neccessary actions to compile the configured php version.
+#
+# ${S} as well as ${D} are pointing to the configured php source tree from the
+# 'src_configure' phase.
+#
+# You are encouraged to use the 'pmake' command instead of a manually called
+# make, as pmake uses the globally defined MAKE_OPTS information from the
+# p configuration file, as well as doing some other black magic.
+##
+src_compile() {
+    pmake
+}
+
+##
+# Install the compiled php into the system
+#
+# ${S} and ${D} are pointing to the directory containing the compiled php
+# source tree
+#
+# You are encouraged to the 'pmake' function instead of calling make manually,
+# as pmake does some black magic to ease your life.
+##
+src_install() {
+    pmake install
+}
+
+##
+# Execute further operations after the current php version has been installed.
+#
+# These operations may include installing pear and pecl packages for the
+# current version, manipulating the configuration file or doing anything else
+# necessary in conjunction with this php install.
+#
+# The installed php version has been enabled when this phase is run. Therefore
+# executing php, pecl or pear will execute the commands with the newly
+# installed php version.
+#
+# You should however not call these tools directly, but use ppear and ppecl.
+#
+# The directory the new php version has been installed to can be reached using
+# ${P} or ${D}, the directory searched for the php.ini is available using ${C}.
+#
+# The ${S} variable still points to the source tree, which php has been
+# installed from. This is useful if certain files should be copied over from
+# there, like the config samples for example.
+##
+src_post_install() {
+    # Nothing done here by default
+    :
+}
+
+##
+# Enable the php version associated with this pbuild.
+#
+# Usually this does only imply that the php as well as pear and pecl "binary"
+# are linked to /usr/local/bin. Each during 'src_post_install' installed pear
+# package with a binary file should be linked as well.
+#
+# You are encouraged to use the plink function to acomplish this task, instead
+# of calling 'ln -s' directly. (It just provides much nicer output as well as
+# integrated error handling ;)
+#
+# The ${P} as well as ${S} variable are pointing to the directory the current
+# php version has been installed to. The ${D} variable points to the directory
+# prefix the links should installed to. (eg. ${D}/bin/php)
+##
+php_enable() {
+    local executable=""
+    for executable in "${S}/bin"/*; do
+        plink "$executable"
+    done
+}
+
+##
+# Disable the php version associated with this pbuild.
+#
+# Usually this does only mean, that all links created during the 'php_enable'
+# phase are removed again.
+#
+# You are encouraged to use 'punlink' instead of calling 'rm' directly, as it
+# contains nice status messages, as well as proper error handling.
+#
+# The ${P} as well as ${S} variable are pointing to the directory the current
+# php version has been installed to. The ${D} variable points to the directory
+# prefix the links should be removed from. (eg. ${D}/bin/php)
+##
+php_disable() {
+    local executable=""
+    for executable in "${S}/bin"/*; do
+        punlink "$executable"
+    done
+}
+
+##
+# Uninstall a before installed php version. This phase is usually called a long
+# time after the build process took place, therefore you do not have any access
+# to the build root anymore.
+#
+# However access to the root directory of the PHP installation is provided as
+# ${P} as well as access to the directory holding the configuration file is
+# provided using ${C}.
+##
+php_uninstall() {
+    # TODO: write default implementation
+    :
+}
