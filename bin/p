@@ -110,6 +110,68 @@ plog() {
 exec 42>&1
 
 ##
+# Ask the user a question and return his/her answer
+#
+# The second argument is optional. It specified a string containing all valid
+# inputs. It can only be used if the questions answer is a one character
+# string. For example a simply yes/no question (y/n). If the second argument is
+# specified only one character answers matching the given characters are valid
+# answers. Everything else will be rejected.
+#
+# The third optional argument specifies a default value, which is used in case
+# the user just presses the enter button without providing any input at all.
+#
+# @param question
+# @param (allowed)
+# @param (default)
+##
+pask() {
+    local question="$1"
+
+    local allowed=""
+    if [ $# -gt 1 ]; then
+        allowed="$2"
+    fi
+
+    local default=""
+    if [ $# -gt 2 ]; then
+        default="$3"
+    fi
+
+    local input=""
+
+    local accepted=1
+    while [ $accepted -ne 0 ]; do
+        echo -n "[?] ${question} " >&42
+        read input
+
+        if [ -z "$input" ]; then
+            input="${default}"
+        fi
+
+        if [ -z "$allowed" ]; then
+            accepted=0
+        else
+            local allowedBoundary=${#allowed}
+            let allowedBoundary=allowedBoundary-1
+            local i=0            
+            for i in $(seq 0 ${allowedBoundary}); do
+                if [ "${allowed:$i:1}" = "${input}" ]; then
+                    accepted=0
+                    break
+                fi
+            done
+
+            if [ $accepted -ne 0 ]; then
+                plog "The given answer is invalid. Possible answers are: ${allowed}"
+            fi
+        fi
+    done
+
+    echo "${input}"
+}
+
+##
 # Return the first of many arguments
 #
 # This function can be used to retrieve the first shell expansion from a list
@@ -186,13 +248,15 @@ done
 #PBUILD=$(findpbuild "$1")
 #plog "Using pbuild '${PBUILD}'"
 
-S="${BASE_DIR}/tmp/pkg"
-D="${BASE_DIR}/tmp/src"
-punpack "php-5.3.6.tar.bz2"
-PT="cli"
-PB="php-5.3.6"
-cd "${D}/php-5.3.6"
-pconfigure
+echo $(pask "Something" "yYnN" "n")
+
+# S="${BASE_DIR}/tmp/pkg"
+# D="${BASE_DIR}/tmp/src"
+# punpack "php-5.3.6.tar.bz2"
+# PT="cli"
+# PB="php-5.3.6"
+# cd "${D}/php-5.3.6"
+# pconfigure
 
 # Close fd 42 again (We want to leave a clean env don't we? ;)
 exec 42>&-
