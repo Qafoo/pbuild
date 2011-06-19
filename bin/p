@@ -118,6 +118,9 @@ exec 42>&1
 # specified only one character answers matching the given characters are valid
 # answers. Everything else will be rejected.
 #
+# If a one character check is done the given input is lowercased before checked
+# against the allowed characters
+#
 # The third optional argument specifies a default value, which is used in case
 # the user just presses the enter button without providing any input at all.
 #
@@ -152,6 +155,7 @@ pask() {
         if [ -z "$allowed" ]; then
             accepted=0
         else
+            input="${input,,}"
             local allowedBoundary=${#allowed}
             let allowedBoundary=allowedBoundary-1
             local i=0            
