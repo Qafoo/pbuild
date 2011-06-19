@@ -38,19 +38,21 @@ set -o errexit
 
 BASE_DIR="$(readlink -f "$(dirname "$(readlink -f "$0")")/..")"
 
-APP_DIR=${BASE_DIR}/p
+INSTALL_DIR="${BASE_DIR}"
 
-PBUILD_DIR=${APP_DIR}/pbuilds
-PACKAGE_DIR=${APP_DIR}/packages
-PHP_DIR=${APP_DIR}/php
+APP_DIR="${BASE_DIR}/p"
 
-PHP_CONFIG_DIR=/etc/php
+PBUILD_DIR="${APP_DIR}/pbuilds"
+PACKAGE_DIR="${APP_DIR}/packages"
+PHP_DIR="${APP_DIR}/php"
 
-SHARED_DIR=${BASE_DIR}/share/p
-FUNCTIONS_DIR=${SHARED_DIR}/functions
+PHP_CONFIG_DIR="/etc/php"
 
-TEMP_DIR=/tmp
-BUILD_DIR=${TEMP_DIR}/p/build
+SHARED_DIR="${BASE_DIR}/share/p"
+FUNCTIONS_DIR="${SHARED_DIR}/functions"
+
+TEMP_DIR="/tmp"
+BUILD_DIR="${TEMP_DIR}/p/build"
 
 
 MAKE_OPTS="-j2"
