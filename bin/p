@@ -232,6 +232,35 @@ makeRelativeTo() {
 }
 
 ##
+# Use the name of a pbuild file to initialize the needed build environment
+#
+# This functions sets the following global variables: PBUILD, PB, PN, PV, and
+# PE
+#
+# PBUILD: full build path
+# PB: name of the pbuild (without extension and path)
+# PN: name of the "product" (usually php)
+# PV: version string of the pbuild
+# PE: extra buildname of the pbuild (everything that comes after a minus behind
+#     the version string)
+#
+# @param pbuild
+##
+initializeEnvironmentByPbuild() {
+    local pbuild="$1"
+
+    local regexp='s@^\([^-]\+\)-\(\([0-9]\+\.\)*[0-9]\+\)-\?\(.*\)$@'
+
+    PBUILD="$pbuild"
+
+    PB=$(basename "${pbuild}" ".pbuild")
+
+    PN="$(echo "$PB"|sed -e "${regexp}\\1@")"
+    PV="$(echo "$PB"|sed -e "${regexp}\\2@")"
+    PE="$(echo "$PB"|sed -e "${regexp}\\4@")"
+}
+
+##
 # Import the configuration file if it does exist.
 ##
 if [ -f "${CONFIG_FILE}" ]; then
@@ -249,10 +278,11 @@ done
 
 ## TODO: Commandline handling
 
-#PBUILD=$(findpbuild "$1")
-#plog "Using pbuild '${PBUILD}'"
+initializeEnvironmentByPbuild "$(findpbuild "$1")"
+plog "Using pbuild '${PBUILD}'"
 
-echo $(pask "Something" "yYnN" "n")
+
+
 
 # S="${BASE_DIR}/tmp/pkg"
 # D="${BASE_DIR}/tmp/src"
