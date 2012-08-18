@@ -506,13 +506,6 @@ done
     ensureCleanFilesystem
 
 
-# S="${BASE_DIR}/tmp/pkg"
-# D="${BASE_DIR}/tmp/src"
-# punpack "php-5.3.6.tar.bz2"
-# PT="cli"
-# PB="php-5.3.6"
-# cd "${D}/php-5.3.6"
-# pconfigure
 
 # Close fd 42 again (We want to leave a clean env don't we? ;)
 exec 42>&-
