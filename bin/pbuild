@@ -442,20 +442,39 @@ fi
 plog "Requested action: ${ACTION}."
 plog "Looking for requested pbuild template."
 
-FOUND_PBUILD="$(findpbuild "$1")"
-if [ -z "${FOUND_PBUILD}" ]; then
+PBUILD="$(findpbuild "$1")"
+if [ -z "${PBUILD}" ]; then
     exit 244
 fi
-
-##
-# Initialize the environment to build a certain template
-##
-initializeEnvironmentForPbuild "${FOUND_PBUILD}"
 plog "Using pbuild '${PBUILD}'."
 
 ##
-# Determine and execute the needed build pipeline steps for the loaded pbuild
+# Determine needed possible dependencies for build
 ##
+BUILD_ORDER="download compile install enable"
+BUILD_ORDER_SINGLETON="disable uninstall"
+
+if echo " ${BUILD_ORDER_SINGLETON} "|grep -q " ${ACTION} "; then
+    # Singleton should be build. No dependency checking needed
+    BUILD_DEPENDENCIES="${ACTION}"
+else
+    # Cut out all the needed steps until the requested build step is reached
+    BUILD_DEPENDENCIES="$(echo " ${BUILD_ORDER} "|sed -e 's@ '"${ACTION}"' .*$@ '"${ACTION}"' @'|sed -e 's@ \(.*\) $@\1@')"
+fi
+plog "The following build steps will be executed in order: ${BUILD_DEPENDENCIES}"
+
+##
+# Build each incarnation
+##
+plog "The following incarnations will be build: ${BUILD_INCARNATIONS}."
+
+for PT in "${BUILD_INCARNATIONS}"; do
+    ##
+    # Determine and execute the needed build pipeline steps for the loaded pbuild
+    ##
+    initializeEnvironmentForPbuild "${PBUILD}"
+done
+
 
 # S="${BASE_DIR}/tmp/pkg"
 # D="${BASE_DIR}/tmp/src"
