@@ -28,7 +28,7 @@
 # List all available pbuilds inside the PBUILD_DIR
 ##
 action_list() {
-    if [ "$(ls -l "${PBUILD_DIR}/"*.pbuild 2>/dev/null| wc -l)" -le 1 ]; then
+    if [ -z "$(ls -A "${PBUILD_DIR}/"*.pbuild 2>/dev/null)" ]; then
         echo "There are currently no pbuild files available in the pbuild directory."
         echo "Make sure '${PBUILD_DIR}' exists and is filled."
     else
