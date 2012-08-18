@@ -71,7 +71,7 @@ BASE_DIR="$(readlink -f "$(dirname "$(readlink -f "$0")")/..")"
 
 INSTALL_DIR="${BASE_DIR}"
 
-APP_DIR="${BASE_DIR}/build"
+APP_DIR="${BASE_DIR}/library"
 
 PBUILD_DIR="${APP_DIR}/pbuilds"
 PACKAGE_DIR="${APP_DIR}/packages"
