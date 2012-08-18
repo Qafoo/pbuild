@@ -135,15 +135,3 @@ php_enable() {
 ##
 php_disable() {
 }
-
-##
-# Uninstall a before installed php version. This phase is usually called a long
-# time after the build process took place, therefore you do not have any access
-# to the build root anymore.
-#
-# However access to the root directory of the PHP installation is provided as
-# ${P} as well as access to the directory holding the configuration file is
-# provided using ${C}.
-##
-php_uninstall() {
-}
