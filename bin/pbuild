@@ -394,6 +394,7 @@ fi
 # Scan for provided options
 ##
 option=""
+OPTIND=0
 while getopts ":h" option; do
     case "${option}" in
         h)
@@ -424,7 +425,7 @@ case "${1}" in
         shift 1
     ;;
     *)
-        if [ "${#} -ge 2" ]; then
+        if [ "${#}" -ge 2 ]; then
             plog "Invalid action '${1}' specified."
             show_usage
         fi
@@ -487,6 +488,7 @@ for PT in ${BUILD_INCARNATIONS}; do
         plog "Executing build action: ${ACTIVE_BUILD_STEP}"
         eval "if necessary_action_${ACTIVE_BUILD_STEP}; then action_${ACTIVE_BUILD_STEP}; else plog \"Action ${ACTIVE_BUILD_STEP} skipped due to previous work\"; fi"
     done
+    plog "Executing build action: ${ACTION}"
     eval "action_${ACTION}"
 done
 
