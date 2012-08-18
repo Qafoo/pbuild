@@ -48,7 +48,7 @@ pconfigure() {
 
     # The type to build is encoded inside the ${PT} variable
     case "${PT}" in
-        "cgi")
+        "fcgi")
             forcedOptions="${forcedOptions} --enable-cgi"
             variableOptions="${variableOptions} --enable-force-cgi-redirect"
             forcedOptions="${forcedOptions} --enable-fastcgi"
