@@ -37,7 +37,8 @@
 #/ enable:    Enable the given pbuild to be available to the system
 #/ disable:   Disable the given pbuild again, removing all linked entries inside
 #/            the system
-#/ uninstall: Uninstall the version from the php directory
+#/ clean:     Remove all previously created data for this pbuild (archive,
+#/            build, install, link)
 #/
 #/ Default: enable
 #/ If no action is specified the enable action is automatically assumed.
@@ -122,13 +123,13 @@ fi
 # - apxs
 # - apxs2
 ##
-BUILD_INCARNATIONS="cli fpm"
+: ${BUILD_INCARNATIONS:="cli fpm"}
 
 ##
 # Path of the config file which is capable of overriding all the above made
 # configuration
 ##
-CONFIG_FILE="/etc/pbuild"
+: ${CONFIG_FILE:="/etc/pbuild"}
 
 ##
 # Variable holding the path to the processed pbuild file. As it is used by plog
@@ -415,7 +416,7 @@ shift "$((OPTIND-1))"
 # The default action
 ACTION="enable"
 case "${1}" in
-    download|compile|install|enable|disable|uninstall)
+    download|compile|install|enable|disable|clean)
         ACTION="${1}"
         shift 1
     ;;
@@ -449,7 +450,7 @@ plog "Using pbuild '${PBUILD}'."
 # Determine needed possible dependencies for build
 ##
 BUILD_ORDER="download compile install enable"
-BUILD_ORDER_SINGLETON="disable uninstall"
+BUILD_ORDER_SINGLETON="disable clean"
 
 if echo " ${BUILD_ORDER_SINGLETON} "|grep -q " ${ACTION} "; then
     # Singleton should be build. No dependency checking needed
@@ -458,7 +459,7 @@ else
     # Cut out all the needed steps until the requested build step is reached
     BUILD_DEPENDENCIES="$(echo " ${BUILD_ORDER} "|sed -e 's@ '"${ACTION}"' .*$@@'|sed -e 's@ \(.*\) $@\1@')"
 fi
-plog "The following build steps will be executed in order: ${BUILD_DEPENDENCIES} ${ACTION}"
+plog "The following build steps will be executed in order: $(echo "${BUILD_DEPENDENCIES} ${ACTION}"|sed -e 's@^ *@@')"
 
 ##
 # Build each incarnation
