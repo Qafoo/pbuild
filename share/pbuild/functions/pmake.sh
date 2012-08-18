@@ -29,5 +29,6 @@
 # MAKE_OPTS
 ##
 pmake() {
+    plog "Executing make: ./make ${MAKE_OPTS} $@"
     eval "make ${MAKE_OPTS}" "$@"
 }
