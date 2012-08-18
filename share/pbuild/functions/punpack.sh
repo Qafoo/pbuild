@@ -42,18 +42,18 @@ punpack() {
         local target="$(makeRelativeTo "${D}" "$2")"
     fi
 
-    # TODO: Implements checks to support more than just tar archives in the
+    # TODO: Implement checks to support more than just tar archives in the
     # future
 
     plog "Decompressing archive: ${archive}"
 
     if [ ! -d "${D}"/"${target}" ]; then
-        mkdir -p "${D}"/"${target}"
+        pmkdir -p "${D}"/"${target}"
     fi
 
     pushd "${D}"/"${target}" >/dev/null
     
-    if ! tar -xaf "${S}"/"${archive}"; then
+    if ! tar -xf "${S}"/"${archive}"; then
         perror "Package archive could not be decompressed"
     fi
 
