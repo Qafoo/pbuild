@@ -459,13 +459,18 @@ else
     # Cut out all the needed steps until the requested build step is reached
     BUILD_DEPENDENCIES="$(echo " ${BUILD_ORDER} "|sed -e 's@ '"${ACTION}"' .*$@@'|sed -e 's@ \(.*\) $@\1@')"
 fi
+
 plog "The following build steps will be executed in order: $(echo "${BUILD_DEPENDENCIES} ${ACTION}"|sed -e 's@^ *@@')"
+plog "The following incarnations will be build: ${BUILD_INCARNATIONS}."
+
+if [ "$(pask "Should I commence the operation? [Y/n]" "yn" "y")" != "y" ]; then
+    plog "Operation aborted due to user request."
+    exit 0
+fi
 
 ##
 # Build each incarnation
 ##
-plog "The following incarnations will be build: ${BUILD_INCARNATIONS}."
-
 for PT in ${BUILD_INCARNATIONS}; do
     ##
     # Determine and execute the needed build pipeline steps for the loaded pbuild
@@ -482,6 +487,7 @@ for PT in ${BUILD_INCARNATIONS}; do
     eval "action_${ACTION}"
 done
 
+plog "All operations successful. Have a nice day."
 
 # Close fd 42 again (We want to leave a clean env don't we? ;)
 exec 42>&-
