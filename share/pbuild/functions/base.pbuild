@@ -137,9 +137,16 @@ src_post_install() {
 ##
 php_enable() {
     local executable=""
-    for executable in "${S}/bin"/*; do
-        plink "$executable"
+
+    for executable in "${S}"/bin/*; do
+        plink -f "${executable}"
     done
+
+    if [ -d "${S}/sbin" ] && [ "$(ls -A "${S}/sbin/")" ]; then
+        for executable in "${S}"/sbin/*; do
+            plink -f "${executable}"
+        done
+    fi
 }
 
 ##
@@ -157,7 +164,13 @@ php_enable() {
 ##
 php_disable() {
     local executable=""
-    for executable in "${S}/bin"/*; do
-        punlink "$executable"
+    for executable in "${S}"/bin/*; do
+        punlink "${executable}"
     done
+
+    if [ -d "${S}/sbin" ] && [ "$(ls -A "${S}/sbin/")" ]; then
+        for executable in "${S}"/sbin/*; do
+            punlink "${executable}"
+        done
+    fi
 }
