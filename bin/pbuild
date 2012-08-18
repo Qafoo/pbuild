@@ -33,14 +33,14 @@ set -o errexit
 
 
 ##
-# Default configuration options if not overwritten by '/etc/p'
+# Default configuration options if not overwritten by '/etc/pbuild'
 ##
 
 BASE_DIR="$(readlink -f "$(dirname "$(readlink -f "$0")")/..")"
 
 INSTALL_DIR="${BASE_DIR}"
 
-APP_DIR="${BASE_DIR}/p"
+APP_DIR="${BASE_DIR}/pbuild"
 
 PBUILD_DIR="${APP_DIR}/pbuilds"
 PACKAGE_DIR="${APP_DIR}/packages"
@@ -48,11 +48,11 @@ PHP_DIR="${APP_DIR}/php"
 
 PHP_CONFIG_DIR="/etc/php"
 
-SHARED_DIR="${BASE_DIR}/share/p"
+SHARED_DIR="${BASE_DIR}/share/pbuild"
 FUNCTIONS_DIR="${SHARED_DIR}/functions"
 
 TEMP_DIR="/tmp"
-BUILD_DIR="${TEMP_DIR}/p/build"
+BUILD_DIR="${TEMP_DIR}/pbuild/build"
 
 
 MAKE_OPTS="-j2"
@@ -62,7 +62,7 @@ MAKE_OPTS="-j2"
 # Path of the config file which is capable of overriding all the above made
 # configuration
 ##
-CONFIG_FILE="/etc/p"
+CONFIG_FILE="/etc/pbuild"
 
 ##
 # Variable holding the path to the processed pbuild file. As it is used by plog
