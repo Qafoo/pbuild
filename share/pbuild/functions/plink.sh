@@ -30,10 +30,32 @@
 # If the target is omitted the source counterpart in the INSTALL_DIR will be
 # chosen automatically
 #
+# The -f option may be provided to force the operation, not asking the user
+# while overwriting a link
+#
+# @option -f
 # @param source
 # @param (target)
 ##
 plink() {
+    local option_force=""
+    local option=""
+    local OPTIND=0
+    while getopts ":f" option; do
+        case "${option}" in
+            f)
+                option_force="SET"
+            ;;
+            \?)
+                perror "Invalid option specified: -${OPTARG}"
+            ;;
+            :)
+                perror "The option -${OPTARG} requires an argument, none given"
+            ;;
+        esac
+    done
+    shift $((OPTIND-1))
+
     local source="$(makeRelativeTo "${S}" "${1}")"
 
     local target="${source}"
@@ -43,11 +65,17 @@ plink() {
 
     plog "Linking: ${source}"
 
-    if [ -e "${D}/${target}" ]; then
-        if [ "$(pask "Link target ${D}/${target} already exists. Overwrite? [y/N]" "yn" "n")" != "y" ]; then
+    if [ -L "${D}/${target}" ]; then
+        if [ -z "${option_force}" ] && [ "$(pask "Link target ${D}/${target} already exists. Overwrite? [y/N]" "yn" "n")" != "y" ]; then
             plog "Skipped linking ${source} due to user request"
             return
+        else
+            rm "${D}/${target}"
         fi
+    fi
+
+    if [ -e "${D}/${target}" ]; then
+        perror "Link target '${D}/${target}' exists and isn't a symlink."
     fi
 
     ln -s "${S}/${source}" "${D}/${target}"

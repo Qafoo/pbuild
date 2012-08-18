@@ -30,7 +30,7 @@
 # @param link
 ##
 punlink() {
-    local link="$(makeRelativeTo "${D}" "$1")"
+    local link="$(makeRelativeTo "${P}" "$1")"
 
     plog "Removing link: ${link}"
 
@@ -45,9 +45,7 @@ punlink() {
         fi
     fi
 
-
-
-    if [ -f "${D}/${link}" ]; then
+    if [ -L "${D}/${link}" ]; then
         rm "${D}/${link}"
     fi
 }
