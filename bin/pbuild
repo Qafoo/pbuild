@@ -497,7 +497,7 @@ plog "The following build steps will be executed in order: ${BUILD_DEPENDENCIES}
 ##
 plog "The following incarnations will be build: ${BUILD_INCARNATIONS}."
 
-for PT in "${BUILD_INCARNATIONS}"; do
+for PT in ${BUILD_INCARNATIONS}; do
     ##
     # Determine and execute the needed build pipeline steps for the loaded pbuild
     ##
