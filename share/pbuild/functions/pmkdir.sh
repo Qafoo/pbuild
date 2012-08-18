@@ -27,7 +27,8 @@
 ##
 # Create the given directory, if it does not exist
 #
-# If the directory is already there nothing will be done
+# If the directory is already there and empty nothing will be done.
+# If the directory exists but it isn't empty, the user is asked what to do
 # If another entity (file, node, ...) exists with the given name error out
 #
 # @param path
@@ -36,7 +37,15 @@ pmkdir() {
     local path="${1}"
 
     if [ -d "${path}" ]; then
-        return
+        if [ -z "$(ls -A "${path}")" ]; then
+            return
+        fi
+
+        if [ "$(pask "Needed directory '${path}' not empty. Clean it? [Y/n] " "yn" "y")" = "y" ]; then
+            rm -rf "${path}"
+        else
+            perror "Needed directory not empty can't continue."
+        fi
     fi
 
     plog "Creating directory: ${path}"
