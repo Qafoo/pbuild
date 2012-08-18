@@ -330,6 +330,36 @@ initializeEnvironmentForPbuild() {
 }
 
 ##
+# Make sure all directories exist to execute a defined build
+#
+# Furthermore it is ensured that the needed build directories are clean
+#
+# This function should only be called, after the initializeEnvironmentForPbuild
+# function has finished its job
+##
+ensureCleanFilesystem() {
+    pmkdir "${PACKAGE_DIR}"
+    pmkdir "${PHP_DIR}"
+    pmkdir "${BUILD_DIR}"
+
+    ACTIVE_BUILD_DIR="${BUILD_DIR}/${PB}_${PT}"
+
+    if [ -d "${ACTIVE_BUILD_DIR}" ] && [ "$( ls -A "${ACTIVE_BUILD_DIR}" )" ]; then
+        if [ "$(pask "Build directory '${ACTIVE_BUILD_DIR}' not empty. Clean it? [Y/n] " "yn" "y")" = "y" ]; then
+            rm -rf "${ACTIVE_BUILD_DIR}"
+        else
+            perror "Build dir not empty can't continue."
+        fi
+    fi
+
+    if [ ! -d "${ACTIVE_BUILD_DIR}" ] && [ -e "${ACTIVE_BUILD_DIR}" ]; then
+        perror "Designated build directory '${ACTIVE_BUILD_DIR}' does exist, but is no directory."
+    fi
+
+    pmkdir "${ACTIVE_BUILD_DIR}"
+}
+
+##
 # Show the program information
 #
 # Display program information of this utility extracted from the this files
@@ -473,6 +503,7 @@ for PT in "${BUILD_INCARNATIONS}"; do
     ##
     initializeEnvironmentForPbuild "${PBUILD}"
 done
+    ensureCleanFilesystem
 
 
 # S="${BASE_DIR}/tmp/pkg"
