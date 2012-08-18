@@ -24,6 +24,37 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ####
+#
+#@ pbuild 1.0 (c) Jakob Westhoff
+#/ Usage: pbuild [-h] [<action>] [<pbuild-template>]
+#/
+#/ The following actions are available:
+#/
+#/ download:  Download the needed archive for the given pbuild
+#/ compile:   Compile the given pbuild and store it's build result inside the
+#/            packages directory
+#/ install:   Install the given pbuild to the specified php directory
+#/ enable:    Enable the given pbuild to be available to the system
+#/ disable:   Disable the given pbuild again, removing all linked entries inside
+#/            the system
+#/ uninstall: Uninstall the version from the php directory
+#/
+#/ Default: enable
+#/ If no action is specified the enable action is automatically assumed.
+#/ 
+#/ Most of those actions depend on each other and are therefore executed in
+#/ a given order. (e.g. the enable action will automatically trigger download,
+#/ compile and install as a prerequisite if necessary.) The pbuild system is
+#/ capable of determining if certain steps need to be executed again or if all
+#/ relevant information are available from a previous run.
+#/
+#/ pbuild-templates can either be addressed by their canonical path or simply
+#/ by there name. A quite inteligent lookup system will try to find the one you
+#/ have been looking for.
+#/
+#/ If neither an action nor a pbuild-template is specified a list of all
+#/ available pbuilds from the pbuild directory is printed.
+##
 
 ##
 # Enable a stricter bash script processing to minimize errors in the code.
@@ -40,7 +71,7 @@ BASE_DIR="$(readlink -f "$(dirname "$(readlink -f "$0")")/..")"
 
 INSTALL_DIR="${BASE_DIR}"
 
-APP_DIR="${BASE_DIR}/pbuild"
+APP_DIR="${BASE_DIR}/build"
 
 PBUILD_DIR="${APP_DIR}/pbuilds"
 PACKAGE_DIR="${APP_DIR}/packages"
@@ -50,13 +81,50 @@ PHP_CONFIG_DIR="/etc/php"
 
 SHARED_DIR="${BASE_DIR}/share/pbuild"
 FUNCTIONS_DIR="${SHARED_DIR}/functions"
+ACTIONS_DIR="${SHARED_DIR}/actions"
 
 TEMP_DIR="/tmp"
 BUILD_DIR="${TEMP_DIR}/pbuild/build"
 
-
+##
+# Default makeopts specifying multiple processes to use
+#
+# Value may be overwritten by configuration of course
+#
+# On linux systems I can retrieve the cpuinfo procfs entry and isolate the
+# number of cores. I don't know a simple way to do this on Mac OS X. If you
+# know one, please contact me, or send a pull request.
+##
 MAKE_OPTS="-j2"
+if [ -f "/proc/cpuinfo" ]; then
+    MAKE_OPTS="$(cat /proc/cpuinfo | grep processor | wc -l)"
+    let MAKE_OPTS="${MAKE_OPTS}"+1
+    MAKE_OPTS="-j${MAKE_OPTS}"
+fi
 
+##
+# Different incarnations of the package to be build
+#
+# The default is a cli version, plus an fpm-fcgi version.
+# You may change this to your linking from within the config file if you want.
+# simply provide a comma seperated list with incarnations to build.
+#
+# You may decide not to build the cli incarnation. This may lead however to
+# quite strange problems, as the cli version is used for example to install
+# pear packages and stuff.
+#
+# The order provided by this configuration determines the build and activation
+# order as well. Therefore cli should always be put first, in order to be
+# available for all later on relevant configuration and installation.
+#
+# Available incarnations are:
+# - cli
+# - fcgi
+# - fpm
+# - apxs
+# - apxs2
+##
+BUILD_INCARNATIONS="cli fpm"
 
 ##
 # Path of the config file which is capable of overriding all the above made
@@ -71,7 +139,9 @@ CONFIG_FILE="/etc/pbuild"
 ##
 PBUILD=""
 
+# a subshell
 ##
+
 # Print out an error to STDERR
 #
 # If the message is printed from within a dsl function show the line number as
@@ -246,7 +316,7 @@ makeRelativeTo() {
 #
 # @param pbuild
 ##
-initializeEnvironmentByPbuild() {
+initializeEnvironmentForPbuild() {
     local pbuild="$1"
 
     local regexp='s@^\([^-]\+\)-\(\([0-9]\+\.\)*[0-9]\+\)-\?\(.*\)$@'
@@ -261,28 +331,131 @@ initializeEnvironmentByPbuild() {
 }
 
 ##
+# Show the program information
+#
+# Display program information of this utility extracted from the this files
+# lines marked with '#@'. The idea for this is from Ryan Tomayko
+# <tomayko.com/about>. Thanks for this nice way of doing it ;)
+##
+show_info() {
+    grep '^#@' <"${0}" | cut -c4-
+}
+##
+# Show the usage information and exit the script
+#
+# Display usage information of this utility extracted from the this files lines
+# marked with '#/' and exit with errorcode 2. The idea for this is from Ryan
+# Tomayko <tomayko.com/about>. Thanks for this nice way of doing it ;)
+##
+show_usage() {
+    grep '^#/' <"${0}" | cut -c4-
+    exit 2
+}
+
+##
 # Import the configuration file if it does exist.
+#
+# This will overwrite all of the default configuration if there is a substitute
+# inside the config file.
 ##
 if [ -f "${CONFIG_FILE}" ]; then
     source "${CONFIG_FILE}"
 fi
 
-# Try to source all the needed functions and the base pbuild template
+##
+# Source all the needed template functions aswell as the base template
+##
 for file in "${FUNCTIONS_DIR}"/*; do
     source "${file}"
 done
 
 ##
-# Run the appropriate actions
+# Source all the needed action functions
 ##
+for file in "${ACTIONS_DIR}"/*; do
+    source "${file}"
+done
 
-## TODO: Commandline handling
+##
+# Handle commandline input
+##
+show_info
 
-initializeEnvironmentByPbuild "$(findpbuild "$1")"
-plog "Using pbuild '${PBUILD}'"
+##
+# Neither an action nor a pbuild has been specified
+##
+if [ "${#}" -lt 1 ]; then
+    action_list
+    exit 0
+fi
 
+##
+# Scan for provided options
+##
+option=""
+while getopts ":h" option; do
+    case "${option}" in
+        h)
+            show_usage
+        ;;
+        \?)
+            plog "Invalid option specified: -${OPTARG}"
+            show_usage
+        ;;
+        :)
+            plog "The option -${OPTARG} requires an argument, none given"
+            show_usage
+        ;;
+    esac
+done
 
+# Remove all the parsed options from the arguments stack
+shift "$((OPTIND-1))"
 
+##
+# Determine the selected action
+##
+# The default action
+ACTION="enable"
+case "${1}" in
+    download|compile|install|enable|disable|uninstall)
+        ACTION="${1}"
+        shift 1
+    ;;
+    *)
+        if [ "${#} -ge 2" ]; then
+            plog "Invalid action '${1}' specified."
+            show_usage
+        fi
+    ;;
+esac
+
+##
+# Options and action are collected let's make sure there still is a pbuild
+# specified.
+##
+if [ "${#}" -lt 1 ]; then
+    plog "No pbuild file has been provided."
+    show_usage
+fi
+
+plog "Requested action: ${ACTION}."
+plog "Looking for requested pbuild template."
+
+FOUND_PBUILD="$(findpbuild "$1")"
+if [ -z "${FOUND_PBUILD}" ]; then
+    exit 244
+fi
+
+##
+# Initialize the environment to build a certain template
+##
+initializeEnvironmentForPbuild "${FOUND_PBUILD}"
+plog "Using pbuild '${PBUILD}'."
+
+##
+# Determine and execute the needed build pipeline steps for the loaded pbuild
+##
 
 # S="${BASE_DIR}/tmp/pkg"
 # D="${BASE_DIR}/tmp/src"
