@@ -453,12 +453,12 @@ BUILD_ORDER_SINGLETON="disable uninstall"
 
 if echo " ${BUILD_ORDER_SINGLETON} "|grep -q " ${ACTION} "; then
     # Singleton should be build. No dependency checking needed
-    BUILD_DEPENDENCIES="${ACTION}"
+    BUILD_DEPENDENCIES=""
 else
     # Cut out all the needed steps until the requested build step is reached
-    BUILD_DEPENDENCIES="$(echo " ${BUILD_ORDER} "|sed -e 's@ '"${ACTION}"' .*$@ '"${ACTION}"' @'|sed -e 's@ \(.*\) $@\1@')"
+    BUILD_DEPENDENCIES="$(echo " ${BUILD_ORDER} "|sed -e 's@ '"${ACTION}"' .*$@@'|sed -e 's@ \(.*\) $@\1@')"
 fi
-plog "The following build steps will be executed in order: ${BUILD_DEPENDENCIES}"
+plog "The following build steps will be executed in order: ${BUILD_DEPENDENCIES} ${ACTION}"
 
 ##
 # Build each incarnation
@@ -478,6 +478,7 @@ for PT in ${BUILD_INCARNATIONS}; do
         plog "Executing build action: ${ACTIVE_BUILD_STEP}"
         eval "if necessary_action_${ACTIVE_BUILD_STEP}; then action_${ACTIVE_BUILD_STEP}; else plog \"Action ${ACTIVE_BUILD_STEP} skipped due to previous work\"; fi"
     done
+    eval "action_${ACTION}"
 done
 
 
