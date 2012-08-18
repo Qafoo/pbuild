@@ -78,8 +78,12 @@ src_compile() {
 ##
 # Install the compiled php into the system
 #
-# ${S} and ${D} are pointing to the directory containing the compiled php
-# source tree
+# ${S} is pointing to the directory containing the compiled php source tree
+# ${D} is pointing to the target directory php should be installed into
+# Please take into account, that PHP has been configured and build with this
+# target directory as set prefix before. Therefore it is unlikely you will be
+# able to manually change the destination here, but one never knows why this
+# information might be needed inside this step
 #
 # You are encouraged to the 'pmake' function instead of calling make manually,
 # as pmake does some black magic to ease your life.
@@ -96,11 +100,13 @@ src_install() {
 # current version, manipulating the configuration file or doing anything else
 # necessary in conjunction with this php install.
 #
-# The installed php version has been enabled when this phase is run. Therefore
-# executing php, pecl or pear will execute the commands with the newly
-# installed php version.
+# If you need to execute binaries from the just installed php version take into
+# account, that they may not be within the search path. Therefore always call
+# them with their full path.
 #
-# You should however not call these tools directly, but use ppear and ppecl.
+# You may use the convinience wrapper pbin, which will call arbitrary
+# executables from inside the just installed php version. For often used
+# commands aliases exist as well: pphp, ppear, ppecl.
 #
 # The directory the new php version has been installed to can be reached using
 # ${P} or ${D}, the directory searched for the php.ini is available using ${C}.
