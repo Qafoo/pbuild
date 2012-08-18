@@ -79,7 +79,10 @@ PACKAGE_DIR="${APP_DIR}/packages"
 BUILD_DIR="${APP_DIR}/build"
 PHP_DIR="${APP_DIR}/php"
 
-PHP_CONFIG_DIR="/etc/php"
+# Where should the all the php.ini directories be stored?
+: ${PHP_CONFIG_DIR:="/etc/php"}
+# Where should all the executables be linked if a version is enabled=
+: ${PHP_INSTALL_PREFIX:="/usr/local"}
 
 SHARED_DIR="${BASE_DIR}/share/pbuild"
 FUNCTIONS_DIR="${SHARED_DIR}/functions"
