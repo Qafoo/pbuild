@@ -151,11 +151,27 @@ src_post_install() {
 php_enable() {
     local executable=""
 
-    for executable in "${S}"/{bin,sbin}/*; do
-        if [ -e "${executable}" ] && [ "${executable%\.dSYM}" = "${executable}" ]; then
-            plink -f "${executable}"
-        fi
-    done
+    case "${FT}" in
+        cli)
+            # Link all executables from bin/sbin, which don't have the .dSYM
+            # suffix
+            for executable in "${S}"/{bin,sbin}/*; do
+                if [ -e "${executable}" ] && [ "${executable%\.dSYM}" = "${executable}" ]; then
+                    plink -f "${executable}"
+                fi
+            done
+        ;;
+        fcgi)
+            # Only link the php-cgi binary
+            plink -f "${S}/bin/php-cgi"
+        ;;
+        fpm)
+            # Only link the php-fpm binary
+            plink -f "${S}/sbin/php-fpm"
+        ;;
+
+        apsx|apsx2) :;; # Nothing to be done here currently
+    esac
 }
 
 ##
