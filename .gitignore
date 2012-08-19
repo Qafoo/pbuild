@@ -1,2 +1,4 @@
 *.*.swp
-/library/
+/library/build
+/library/packages
+/library/php
