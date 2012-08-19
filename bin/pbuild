@@ -94,14 +94,22 @@ ACTIONS_DIR="${SHARED_DIR}/actions"
 # Value may be overwritten by configuration of course
 #
 # On linux systems I can retrieve the cpuinfo procfs entry and isolate the
-# number of cores. I don't know a simple way to do this on Mac OS X. If you
-# know one, please contact me, or send a pull request.
+# number of cores. Mac OS needs a different approach, as it doesn't have
+# a procfs
 ##
 MAKE_OPTS="-j2"
 if [ -f "/proc/cpuinfo" ]; then
-    MAKE_OPTS="$(cat /proc/cpuinfo | grep processor | wc -l)"
-    let MAKE_OPTS="${MAKE_OPTS}"+1
+    # Linux
+    PROCESSOR_CORES="$(cat /proc/cpuinfo | grep processor | wc -l)"
+    let MAKE_OPTS="${PROCESSOR_CORES}"+1
     MAKE_OPTS="-j${MAKE_OPTS}"
+else
+    # MacOS/Darwin
+    PROCESSOR_CORES="$(set -e; set -o pipefail; sysctl hw.ncpu 2>/dev/null | sed -e 's@^.\+:\s*\([0-9]\+\)$@\1@')"
+    if [ "$?" -eq 0 ]; then
+        let MAKE_OPTS="${PROCESSOR_CORES}"+1
+        MAKE_OPTS="-j${MAKE_OPTS}"
+    fi
 fi
 
 ##
