@@ -68,7 +68,7 @@ src_configure() {
 #
 # You are encouraged to use the 'pmake' command instead of a manually called
 # make, as pmake uses the globally defined MAKE_OPTS information from the
-# p configuration file, as well as doing some other black magic.
+# pbuild configuration file, as well as doing some other black magic.
 ##
 src_compile() {
     cd "${S}/${PB}"
@@ -151,7 +151,7 @@ src_post_install() {
 php_enable() {
     local executable=""
 
-    case "${FT}" in
+    case "${PT}" in
         cli)
             # Link all executables from bin/sbin, which don't have the .dSYM
             # suffix
