@@ -80,7 +80,7 @@ BUILD_DIR="${APP_DIR}/build"
 PHP_DIR="${APP_DIR}/php"
 
 # Where should the all the php.ini directories be stored?
-: ${PHP_CONFIG_DIR:="/etc/php"}
+: ${PHP_CONFIG_DIR:="/usr/local/etc/php"}
 # Where should all the executables be linked if a version is enabled=
 : ${PHP_INSTALL_PREFIX:="/usr/local"}
 
