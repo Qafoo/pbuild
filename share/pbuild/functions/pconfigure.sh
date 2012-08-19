@@ -47,22 +47,41 @@ pconfigure() {
     forcedOptions="${forcedOptions} --enable-cli"
 
     # The type to build is encoded inside the ${PT} variable
+    # Please take into account that some of those configure options were
+    # removed and/or modified in different php versions. Unknown configure
+    # options do not hurt however, therefore some of them like --enable-fastcgi
+    # are still here in order to work with older versions of php
+    # Furthermore the cli-build is enabled by default in all incarnations, as
+    # the executable is quite useful to install pear packages and stuff like
+    # that inside the correct directories without careing about it.
     case "${PT}" in
+        "fpm")
+            forcedOptions="${forcedOptions} --enable-cgi"
+            variableOptions="${variableOptions} --enable-force-cgi-redirect"
+            forcedOptions="${forcedOptions} --enable-fastcgi"
+            forcedOptions="${forcedOptions} --enable-fpm"
+            variableOptions="${variableOptions} --enable-cli"
+        ;;
         "fcgi")
             forcedOptions="${forcedOptions} --enable-cgi"
             variableOptions="${variableOptions} --enable-force-cgi-redirect"
             forcedOptions="${forcedOptions} --enable-fastcgi"
+            variableOptions="${variableOptions} --enable-cli"
         ;;
         "cli")
+            forcedOptions="${forcedOptions} --disable-fpm"
             forcedOptions="${forcedOptions} --disable-cgi"
+            forcedOptions="${forcedOptions} --disable-fastcgi"
         ;;
         "apxs")
             forcedOptions="${forcedOptions} --with-apxs"
             forcedOptions="${forcedOptions} --disable-cgi"
+            variableOptions="${variableOptions} --enable-cli"
         ;;
         "apxs2")
             forcedOptions="${forcedOptions} --with-apxs2"
             forcedOptions="${forcedOptions} --disable-cgi"
+            variableOptions="${variableOptions} --enable-cli"
         ;;
         *)
             perror "Tried to configure unknown build type: ${PT}"
