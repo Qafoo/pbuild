@@ -91,6 +91,19 @@ src_compile() {
 src_install() {
     cd "${S}/${PB}"
     pmake install
+
+    # Fix some filename inconvieniences on MacOS. Some of the executables get
+    # the *.dSYM suffix there, which should just be removed for everything else
+    # to be fine ;)
+    local filename=""
+    for filename in "${D}"/{bin,sbin}/*.dSYM; do
+        if [ -e "${filename}" ]; then
+            # We only symlink instead of move here, because the php-config
+            # information still points to the original executable, therefore we
+            # do not want to remove it
+            ln -s "${filename}" "${filename%\.dSYM}"
+        fi
+    done
 }
 
 ##
@@ -138,15 +151,11 @@ src_post_install() {
 php_enable() {
     local executable=""
 
-    for executable in "${S}"/bin/*; do
-        plink -f "${executable}"
-    done
-
-    if [ -d "${S}/sbin" ] && [ "$(ls -A "${S}/sbin/")" ]; then
-        for executable in "${S}"/sbin/*; do
+    for executable in "${S}"/{bin,sbin}/*; do
+        if [ -e "${executable}" ] && [ "${executable%\.dSYM}" = "${executable}" ]; then
             plink -f "${executable}"
-        done
-    fi
+        fi
+    done
 }
 
 ##
