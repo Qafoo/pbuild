@@ -310,7 +310,7 @@ makeRelativeTo() {
 
     pushd "${relative}" >/dev/null
     
-    local processed="$(readlink -m "${path}")"
+    local processed="${path}"
 
     # If the target has been specified with a full path to the destination
     # remove this path prefix.
