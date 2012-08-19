@@ -158,10 +158,10 @@ perror() {
     local message="$@"
 
     if [ -z "${PBUILD}" ]; then
-        echo "[!] ${message}" >&2
+        echo -e "[\033[38;5;9m!\033[0m;] ${message}" >&2
     else
         eval set -- $(caller 1)
-        echo "[!] ${PBUILD}:${1}: ${message}" >&2
+        echo -e "[\033[38;5;9m!\033[0m;] ${PBUILD}:${1}: ${message}" >&2
     fi
 
     exit 244
@@ -192,13 +192,29 @@ plog() {
     local message="$@"
 
     if [ ! -z "${verbose_option}" ] && [ ! -z "${VERBOSE}" ]; then
-        echo "[>] ${message}" >&42
+        echo -e "[\033[38;5;10m>\033[0m] ${message}" >&42
         return
     fi
 
     if [ -z "${verbose_option}" ]; then
-        echo "[>] ${message}" >&42
+        echo -e "[\033[38;5;10m>\033[0m] ${message}" >&42
     fi
+}
+
+##
+# Print a task message message
+#
+# Task messages are like log messages, but indicate a bigger amount of work,
+# which is just being done. Like a certain build step for example.
+#
+# It is indicated using another color
+#
+# @param message
+##
+ptask() {
+    local message="$@"
+
+    echo -e "[\033[38;5;11m\$\033[0m] ${message}" >&42
 }
 
 # Open the file descriptor with number 42 to point to stdout. This allows for
@@ -241,7 +257,7 @@ pask() {
 
     local accepted=1
     while [ $accepted -ne 0 ]; do
-        echo -n "[?] ${question} " >&42
+        echo -en "[\033[38;5;12m?\033[0m] ${question} " >&42
         read input
 
         if [ -z "$input" ]; then
@@ -507,7 +523,7 @@ for PT in ${BUILD_INCARNATIONS}; do
     ##
     source "${PBUILD}"
     initializeEnvironmentForPbuild "${PBUILD}"
-    plog "Building ${PB}, incarnation ${PT}"
+    ptask "Building ${PB}, incarnation ${PT}"
 
     ACTIVE_BUILD_STEP=""
     for ACTIVE_BUILD_STEP in ${BUILD_DEPENDENCIES}; do
@@ -518,7 +534,7 @@ for PT in ${BUILD_INCARNATIONS}; do
     eval "action_${ACTION}"
 done
 
-plog "All operations successful. Have a nice day."
+ptask "All operations successful. Have a nice day."
 
 # Close fd 42 again (We want to leave a clean env don't we? ;)
 exec 42>&-
