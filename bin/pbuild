@@ -26,7 +26,7 @@
 ####
 #
 #@ pbuild 1.0 (c) Jakob Westhoff
-#/ Usage: pbuild [-h] [<action>] [<pbuild-template>]
+#/ Usage: pbuild [-h][-v] [<action>] [<pbuild-template>]
 #/
 #/ The following actions are available:
 #/
@@ -170,11 +170,35 @@ perror() {
 ##
 # Print some sort of log message
 #
+# The -v option may be used to indicate a verbose logging operation. Those
+# logging output will only be displayed, if the user specifies the -v flag as
+# well.
+#
+# @option -v
 # @param message
 ##
 plog() {
+    local verbose_option=""
+    OPTIND=0
+    local option=""
+    while getopts ":v" option; do
+        case "${option}" in
+            v) verbose_option="SET";;
+            *) perror "Invalid option given to plog";;
+        esac
+    done
+    shift $((OPTIND-1))
+
     local message="$@"
-    echo "[>] ${message}" >&42
+
+    if [ ! -z "${verbose_option}" ] && [ ! -z "${VERBOSE}" ]; then
+        echo "[>] ${message}" >&42
+        return
+    fi
+
+    if [ -z "${verbose_option}" ]; then
+        echo "[>] ${message}" >&42
+    fi
 }
 
 # Open the file descriptor with number 42 to point to stdout. This allows for
@@ -393,13 +417,14 @@ fi
 ##
 # Scan for provided options
 ##
+VERBOSE=""
+
 option=""
 OPTIND=0
-while getopts ":h" option; do
+while getopts ":hv" option; do
     case "${option}" in
-        h)
-            show_usage
-        ;;
+        h) show_usage;;
+        v) VERBOSE="SET";;
         \?)
             plog "Invalid option specified: -${OPTARG}"
             show_usage
@@ -441,8 +466,9 @@ if [ "${#}" -lt 1 ]; then
     show_usage
 fi
 
-plog "Requested action: ${ACTION}."
-plog "Looking for requested pbuild template."
+plog -v "Requested action: ${ACTION}."
+
+plog -v "Looking for requested pbuild template."
 
 PBUILD="$(findpbuild "$1")"
 if [ -z "${PBUILD}" ]; then
@@ -485,10 +511,10 @@ for PT in ${BUILD_INCARNATIONS}; do
 
     ACTIVE_BUILD_STEP=""
     for ACTIVE_BUILD_STEP in ${BUILD_DEPENDENCIES}; do
-        plog "Executing build action: ${ACTIVE_BUILD_STEP}"
-        eval "if necessary_action_${ACTIVE_BUILD_STEP}; then action_${ACTIVE_BUILD_STEP}; else plog \"Action ${ACTIVE_BUILD_STEP} skipped due to previous work\"; fi"
+        plog -v "Executing build action: ${ACTIVE_BUILD_STEP}"
+        eval "if necessary_action_${ACTIVE_BUILD_STEP}; then action_${ACTIVE_BUILD_STEP}; else plog -v \"Action ${ACTIVE_BUILD_STEP} skipped due to previous work\"; fi"
     done
-    plog "Executing build action: ${ACTION}"
+    plog -v "Executing build action: ${ACTION}"
     eval "action_${ACTION}"
 done
 

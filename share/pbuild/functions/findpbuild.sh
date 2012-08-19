@@ -55,19 +55,19 @@ findpbuild() {
     fi
 
     if [ -f "$(getFirstArgument ${PBUILD_DIR}/${pattern}-*.pbuild)" ]; then
-        plog "Falling back to pbuilds with a buildname"
+        plog -v "Falling back to pbuilds with a buildname"
         echo "$(getFirstArgument ${PBUILD_DIR}/${pattern}-*.pbuild)"
         return
     fi
 
     if [ -f "$(pwd)/${pattern}.pbuild" ]; then
-        plog "Falling back to pbuilds in the current working directory"
+        plog -v "Falling back to pbuilds in the current working directory"
         echo "$(readlink -f "$(pwd)/${pattern}.pbuild")"
         return
     fi
 
     if [ -f "$(getFirstArgument $(pwd)/${pattern}-*.pbuild)" ]; then
-        plog "Falling back to pbuilds in the current working directory with a build name"
+        plog -v "Falling back to pbuilds in the current working directory with a build name"
         echo "$(getFirstArgument $(pwd)/${pattern}-*.pbuild)"
         return
     fi
