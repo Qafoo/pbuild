@@ -29,6 +29,15 @@
 # MAKE_OPTS
 ##
 pmake() {
-    plog "Executing make: ./make ${MAKE_OPTS} $@"
-    eval "make ${MAKE_OPTS}" "$@"
+    local modified_make_opts="${MAKE_OPTS}"
+
+    # If `make install` is called it should always be done in a single process,
+    # as otherwise race conditions may occure
+    if [ "$1" = "install" ]; then
+        modified_make_opts="$(echo "${modified_make_opts}"|sed -e 's@-j\s*[0-9]\+@@g')"
+        modified_make_opts="${modified_make_opts} -j1"
+    fi
+
+    plog "Executing make: ./make ${modified_make_opts} $@"
+    eval "make ${modified_make_opts}" "$@"
 }
