@@ -514,6 +514,18 @@ else
     BUILD_DEPENDENCIES="$(echo " ${BUILD_ORDER} "|sed -e 's@ '"${ACTION}"' .*$@@'|sed -e 's@ \(.*\) $@\1@')"
 fi
 
+# Calculate which of the given build dependencies need actual executing,
+# because they haven't already been run
+initializeEnvironmentForPbuild "${PBUILD}"
+BUILD_DEPENDENCIES="${BUILD_DEPENDENCIES# }"
+for DEPENDENCY in ${BUILD_DEPENDENCIES}; do
+    for PT in ${BUILD_INCARNATIONS}; do
+        eval "if necessary_action_${DEPENDENCY}; then break 2; fi;"
+    done
+    eval "BUILD_DEPENDENCIES=\"\${BUILD_DEPENDENCIES#${DEPENDENCY}}\""
+    BUILD_DEPENDENCIES="${BUILD_DEPENDENCIES# }"
+done
+
 plog "The following build steps will be executed in order: $(echo "${BUILD_DEPENDENCIES} ${ACTION}"|sed -e 's@^ *@@')"
 plog "The following incarnations will be build: ${BUILD_INCARNATIONS}."
 
