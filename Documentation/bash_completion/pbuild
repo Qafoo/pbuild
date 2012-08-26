@@ -1,0 +1,68 @@
+#!/bin/bash
+####
+# Copyright (c) 2011-2012, Jakob Westhoff <jakob@qafoo.com>
+# 
+# All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+# 
+#  - Redistributions of source code must retain the above copyright notice, this
+#    list of conditions and the following disclaimer.
+#  - Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+####
+
+_pbuild() 
+{
+    COMPREPLY=()
+
+    # Only complete first and second argument
+    if [ "${COMP_CWORD}" -gt 2 ]; then
+        return 0
+    fi
+
+    local current="${COMP_WORDS[COMP_CWORD]}"
+    local previous="${COMP_WORDS[COMP_CWORD-1]}"
+
+    ##
+    # Actions to be completed
+    ##
+    local actions="list download compile install enable disable clean"
+
+    ##
+    # Completion for the different actions
+    ##
+    case "${previous}" in
+        download|compile|install|enable|disable|clean)
+            local version=""
+            local phpversions="$(for version in $(pbuild list|grep "*"|cut -c "3-"); do echo "${version} "; done)"
+
+            COMPREPLY=( $(compgen -W "${phpversions}" -- ${current}) )
+            return 0
+        ;;
+        list)
+            COMPREPLY=()
+            return 0
+        ;;
+        *)
+            # Default completion of actions
+            COMPREPLY=($(compgen -W "${actions}" -- ${current}))  
+            return 0
+        ;;
+    esac
+
+}
+complete -F _pbuild pbuild
