@@ -72,7 +72,7 @@ BASE_DIR="$(readlink -f "$(dirname "$(readlink -f "$0")")/..")"
 
 INSTALL_DIR="${BASE_DIR}"
 
-APP_DIR="${BASE_DIR}/library"
+APP_DIR="${BASE_DIR}/Library"
 
 PBUILD_DIR="${APP_DIR}/pbuilds"
 PACKAGE_DIR="${APP_DIR}/packages"
@@ -84,7 +84,7 @@ PHP_DIR="${APP_DIR}/php"
 # Where should all the executables be linked if a version is enabled=
 : ${PHP_INSTALL_PREFIX:="/usr/local"}
 
-SHARED_DIR="${BASE_DIR}/share/pbuild"
+SHARED_DIR="${BASE_DIR}/share"
 FUNCTIONS_DIR="${SHARED_DIR}/functions"
 ACTIONS_DIR="${SHARED_DIR}/actions"
 
