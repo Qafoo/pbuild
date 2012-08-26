@@ -1,5 +1,5 @@
 ####
-# Copyright (c) 2011, Jakob Westhoff <jakob@westhoffswelt.de>
+# Copyright (c) 2011-2012, Jakob Westhoff <jakob@qafoo.com>
 # 
 # All rights reserved.
 # 
