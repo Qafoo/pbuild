@@ -87,30 +87,8 @@ PHP_DIR="${APP_DIR}/php"
 SHARED_DIR="${BASE_DIR}/share"
 FUNCTIONS_DIR="${SHARED_DIR}/functions"
 ACTIONS_DIR="${SHARED_DIR}/actions"
-
-##
-# Default makeopts specifying multiple processes to use
-#
-# Value may be overwritten by configuration of course
-#
-# On linux systems I can retrieve the cpuinfo procfs entry and isolate the
-# number of cores. Mac OS needs a different approach, as it doesn't have
-# a procfs
-##
-MAKE_OPTS="-j2"
-if [ -f "/proc/cpuinfo" ]; then
-    # Linux
-    PROCESSOR_CORES="$(cat /proc/cpuinfo | grep processor | wc -l)"
-    let MAKE_OPTS="${PROCESSOR_CORES}"+1
-    MAKE_OPTS="-j${MAKE_OPTS}"
-else
-    # MacOS/Darwin
-    PROCESSOR_CORES="$(set -e; set -o pipefail; sysctl hw.ncpu 2>/dev/null | sed -e 's@^.\+:\s*\([0-9]\+\)$@\1@')"
-    if [ "$?" -eq 0 ]; then
-        let MAKE_OPTS="${PROCESSOR_CORES}"+1
-        MAKE_OPTS="-j${MAKE_OPTS}"
-    fi
-fi
+TEMPLATES_DIR="${SHARED_DIR}/templates"
+UTILITIES_DIR="${SHARED_DIR}/utilities"
 
 ##
 # Different incarnations of the package to be build
@@ -149,235 +127,33 @@ fi
 ##
 PBUILD=""
 
-# a subshell
 ##
-
-# Print out an error to STDERR
+# Determine default makeopts specifying multiple processes to use
 #
-# If the message is printed from within a dsl function show the line number as
-# well as pbuild filename.
+# Value may be overwritten by configuration of course
 #
-# Errors are considered fatal. After an error has been logged the execution of
-# the whole application is stopped.
-#
-# @param message
+# On linux systems I can retrieve the cpuinfo procfs entry and isolate the
+# number of cores. Mac OS needs a different approach, as it doesn't have
+# a procfs
 ##
-perror() {
-    local message="$@"
-
-    if [ -z "${PBUILD}" ]; then
-        echo -e "[\033[38;5;9m!\033[0m] ${message}" >&2
-    else
-        eval set -- $(caller 1)
-        echo -e "[\033[38;5;9m!\033[0m] ${PBUILD}:${1}: ${message}" >&2
+MAKE_OPTS="-j2"
+if [ -f "/proc/cpuinfo" ]; then
+    # Linux
+    PROCESSOR_CORES="$(cat /proc/cpuinfo | grep processor | wc -l)"
+    let MAKE_OPTS="${PROCESSOR_CORES}"+1
+    MAKE_OPTS="-j${MAKE_OPTS}"
+else
+    # MacOS/Darwin
+    PROCESSOR_CORES="$(set -e; set -o pipefail; sysctl hw.ncpu 2>/dev/null | sed -e 's@^.\+:\s*\([0-9]\+\)$@\1@')"
+    if [ "$?" -eq 0 ]; then
+        let MAKE_OPTS="${PROCESSOR_CORES}"+1
+        MAKE_OPTS="-j${MAKE_OPTS}"
     fi
-
-    exit 244
-}
-
-##
-# Print some sort of log message
-#
-# The -v option may be used to indicate a verbose logging operation. Those
-# logging output will only be displayed, if the user specifies the -v flag as
-# well.
-#
-# @option -v
-# @param message
-##
-plog() {
-    local verbose_option=""
-    OPTIND=0
-    local option=""
-    while getopts ":v" option; do
-        case "${option}" in
-            v) verbose_option="SET";;
-            *) perror "Invalid option given to plog";;
-        esac
-    done
-    shift $((OPTIND-1))
-
-    local message="$@"
-
-    if [ ! -z "${verbose_option}" ] && [ ! -z "${VERBOSE}" ]; then
-        echo -e "[\033[38;5;10m>\033[0m] ${message}" >&42
-        return
-    fi
-
-    if [ -z "${verbose_option}" ]; then
-        echo -e "[\033[38;5;10m>\033[0m] ${message}" >&42
-    fi
-}
-
-##
-# Print a task message message
-#
-# Task messages are like log messages, but indicate a bigger amount of work,
-# which is just being done. Like a certain build step for example.
-#
-# It is indicated using another color
-#
-# @param message
-##
-ptask() {
-    local message="$@"
-
-    echo -e "[\033[38;5;11m\$\033[0m] ${message}" >&42
-}
+fi
 
 # Open the file descriptor with number 42 to point to stdout. This allows for
 # logging from inside of functions with a return value.
 exec 42>&1
-
-##
-# Ask the user a question and return his/her answer
-#
-# The second argument is optional. It specified a string containing all valid
-# inputs. It can only be used if the questions answer is a one character
-# string. For example a simply yes/no question (y/n). If the second argument is
-# specified only one character answers matching the given characters are valid
-# answers. Everything else will be rejected.
-#
-# If a one character check is done the given input is lowercased before checked
-# against the allowed characters
-#
-# The third optional argument specifies a default value, which is used in case
-# the user just presses the enter button without providing any input at all.
-#
-# @param question
-# @param (allowed)
-# @param (default)
-##
-pask() {
-    local question="$1"
-
-    local allowed=""
-    if [ $# -gt 1 ]; then
-        allowed="$2"
-    fi
-
-    local default=""
-    if [ $# -gt 2 ]; then
-        default="$3"
-    fi
-
-    local input=""
-
-    local accepted=1
-    while [ $accepted -ne 0 ]; do
-        echo -en "[\033[38;5;12m?\033[0m] ${question} " >&42
-        read input
-
-        if [ -z "$input" ]; then
-            input="${default}"
-        fi
-
-        if [ -z "$allowed" ]; then
-            accepted=0
-        else
-            local allowedBoundary=${#allowed}
-            let allowedBoundary=allowedBoundary-1
-            local i=0            
-            for i in $(seq 0 ${allowedBoundary}); do
-                if [ "${allowed:$i:1}" = "${input}" ]; then
-                    accepted=0
-                    break
-                fi
-            done
-
-            if [ $accepted -ne 0 ]; then
-                plog "The given answer is invalid. Possible answers are: ${allowed}"
-            fi
-        fi
-    done
-
-    echo "${input}"
-}
-
-##
-# Return the first of many arguments
-#
-# This function can be used to retrieve the first shell expansion from a list
-# of multiple expansions
-##
-getFirstArgument() {
-    echo "$1"
-}
-
-##
-# Escape a given string in a way it can be safely used as part of regexp
-# without containing any special meaning. (The regexp delimiters need to be @)
-#
-# @param string
-# @return escaped string
-##
-escapeForRegexp() {
-    echo "$@" | sed -e 's@\(\.\|\@\|\*\|\[\|\]\|\\\)@\\&@g'
-}
-
-##
-# Make the given string relative to the given path
-#
-# To create a relative path the prefixing slash will be removed. Furthermore it
-# will be checked if the string starts with the path (aka. is absolute) in this
-# case the path prefix will be removed.
-#
-# The relative path must exist for this function to work.
-#
-# @param relative
-# @param path
-# @return path
-##
-makeRelativeTo() {
-    local relative="$1"
-    local path="$2"
-
-    pushd "${relative}" >/dev/null
-    
-    local processed="${path}"
-
-    # If the target has been specified with a full path to the destination
-    # remove this path prefix.
-    processed="$(echo "${processed}"|sed -e "s@^$(escapeForRegexp "${relative}")@@")"
-
-    # Remove any prefixed slash to ensure we are inside the target dir. This
-    # may create strange subdir structures, but it will make sure we have
-    # a somewhat relative path.
-    processed="$(echo "${processed}"|sed -e 's@^/*@@')"
-
-    popd >/dev/null
-
-    echo "${processed}"
-}
-
-##
-# Use the name of a pbuild file to initialize the needed build environment
-#
-# This functions sets the following global variables: PBUILD, PB, PN, PV, and
-# PE
-#
-# PBUILD: full build path
-# PB: name of the pbuild (without extension and path)
-# PN: name of the "product" (usually php)
-# PV: version string of the pbuild
-# PE: extra buildname of the pbuild (everything that comes after a minus behind
-#     the version string)
-#
-# @param pbuild
-##
-initializeEnvironmentForPbuild() {
-    local pbuild="$1"
-
-    local regexp='s@^\([^-]\+\)-\(\([0-9]\+\.\)*[0-9]\+\)-\?\(.*\)$@'
-
-    PBUILD="$pbuild"
-
-    PB=$(basename "${pbuild}" ".pbuild")
-
-    PN="$(echo "$PB"|sed -e "${regexp}\\1@")"
-    PV="$(echo "$PB"|sed -e "${regexp}\\2@")"
-    PE="$(echo "$PB"|sed -e "${regexp}\\4@")"
-}
 
 ##
 # Show the program information
@@ -389,6 +165,7 @@ initializeEnvironmentForPbuild() {
 show_info() {
     grep '^#@' <"${0}" | cut -c4-
 }
+
 ##
 # Show the usage information and exit the script
 #
@@ -402,28 +179,57 @@ show_usage() {
 }
 
 ##
+# Source all files in the given directory.
+#
+# The optional second argument can be used to specify a file extension of the
+# files, which should be included. By default ".sh" is assumed.
+#
+# @param directory
+# @param extension=".sh"
+##
+source_directory() {
+    local directory="${1}"
+    local extension="${2:-.sh}"
+
+    if [ -d "${directory}" ]; then
+        local file
+        for file in "${directory}/"*${extension}; do
+            source "${file}"
+        done
+    fi
+}
+
+##
+# Source the given file, if it exists.
+#
+# If the given file does not exist nothing will happen
+#
+# @param filename
+##
+safe_source() {
+    local filename="${1}"
+
+    if [ -f "${filename}" ]; then
+        source "${filename}"
+    fi
+}
+
+##
 # Import the configuration file if it does exist.
 #
 # This will overwrite all of the default configuration if there is a substitute
 # inside the config file.
 ##
-if [ -f "${CONFIG_FILE}" ]; then
-    source "${CONFIG_FILE}"
-fi
+safe_source "${CONFIG_FILE}"
 
 ##
-# Source all the needed template functions aswell as the base template
+# Source all the needed action, function, template and utility code
 ##
-for file in "${FUNCTIONS_DIR}"/*; do
-    source "${file}"
-done
+source_directory "${UTILITIES_DIR}"
+source_directory "${FUNCTIONS_DIR}"
+source_directory "${ACTIONS_DIR}"
+source_directory "${TEMPLATES_DIR}" ".pbuild"
 
-##
-# Source all the needed action functions
-##
-for file in "${ACTIONS_DIR}"/*; do
-    source "${file}"
-done
 
 ##
 # Handle commandline input
@@ -472,6 +278,10 @@ case "${1}" in
     download|compile|install|enable|disable|clean)
         ACTION="${1}"
         shift 1
+    ;;
+    list)
+        action_list
+        exit 0
     ;;
     *)
         if [ "${#}" -ge 2 ]; then
