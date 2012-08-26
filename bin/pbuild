@@ -30,6 +30,7 @@
 #/
 #/ The following actions are available:
 #/
+#/ list:      Show a list of php version for which pbuilds exist
 #/ download:  Download the needed archive for the given pbuild
 #/ compile:   Compile the given pbuild and store it's build result inside the
 #/            packages directory
@@ -336,8 +337,8 @@ for DEPENDENCY in ${BUILD_DEPENDENCIES}; do
     BUILD_DEPENDENCIES="${BUILD_DEPENDENCIES# }"
 done
 
-plog "The following build steps will be executed in order: $(echo "${BUILD_DEPENDENCIES} ${ACTION}"|sed -e 's@^ *@@')"
-plog "The following incarnations will be build: ${BUILD_INCARNATIONS}."
+plog "The following build steps will be executed in order: \033[38;5;3m$(echo "${BUILD_DEPENDENCIES} ${ACTION}"|sed -e 's@^ *@@')\033[0m"
+plog "The following incarnations will be build: \033[38;5;3m${BUILD_INCARNATIONS}\033[0m."
 
 if [ "$(pask "Should I commence the operation? [Y/n]" "yn" "y")" != "y" ]; then
     plog "Operation aborted due to user request."
