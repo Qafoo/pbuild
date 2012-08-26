@@ -70,6 +70,8 @@ pask() {
         if [ -z "$allowed" ]; then
             accepted=0
         else
+            input="$(echo "${input}"|tr '[A-Z]' '[a-z]')"
+
             local allowedBoundary=${#allowed}
             let allowedBoundary=allowedBoundary-1
             local i=0            
