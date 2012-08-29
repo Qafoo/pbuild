@@ -60,7 +60,7 @@ pask() {
 
     local accepted=1
     while [ $accepted -ne 0 ]; do
-        echo -en "[\033[38;5;12m?\033[0m] ${question} " >&42
+        echo -en "[${COLOR_BLUE}?${COLOR_NONE}] ${question} " >&42
         read input
 
         if [ -z "$input" ]; then

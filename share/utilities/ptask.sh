@@ -37,5 +37,5 @@
 ptask() {
     local message="$@"
 
-    echo -e "[\033[38;5;11m\$\033[0m] ${message}" >&42
+    echo -e "[${COLOR_YELLOW}\$${COLOR_NONE}] ${message}" >&42
 }

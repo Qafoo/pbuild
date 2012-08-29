@@ -337,8 +337,8 @@ for DEPENDENCY in ${BUILD_DEPENDENCIES}; do
     BUILD_DEPENDENCIES="${BUILD_DEPENDENCIES# }"
 done
 
-plog "The following build steps will be executed in order: \033[38;5;3m$(echo "${BUILD_DEPENDENCIES} ${ACTION}"|sed -e 's@^ *@@')\033[0m"
-plog "The following incarnations will be build: \033[38;5;3m${BUILD_INCARNATIONS}\033[0m."
+plog "The following build steps will be executed in order: ${COLOR_PURPLE}$(echo "${BUILD_DEPENDENCIES} ${ACTION}"|sed -e 's@^ *@@')${COLOR_NONE}"
+plog "The following incarnations will be build: ${COLOR_PURPLE}${BUILD_INCARNATIONS}${COLOR_NONE}."
 
 if [ "$(pask "Should I commence the operation? [Y/n]" "yn" "y")" != "y" ]; then
     plog "Operation aborted due to user request."
