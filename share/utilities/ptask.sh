@@ -37,5 +37,5 @@
 ptask() {
     local message="$@"
 
-    echo -e "[${COLOR_YELLOW}\$${COLOR_NONE}] ${message}" >&42
+    colorize "[<yellow>\$</yellow>] ${message}" >&42
 }

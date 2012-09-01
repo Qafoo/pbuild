@@ -39,10 +39,10 @@ perror() {
     local message="$@"
 
     if [ -z "${PBUILD}" ]; then
-        echo -e "[${COLOR_RED}!${COLOR_NONE}] ${message}" >&2
+        colorize "[<red>!</red>] ${message}" >&2
     else
         eval set -- $(caller 1)
-        echo -e "[${COLOR_RED}!${COLOR_NONE}] ${PBUILD}:${1}: ${message}" >&2
+        colorize "[<red>!</red>] ${PBUILD}:${1}: ${message}" >&2
     fi
 
     exit 244

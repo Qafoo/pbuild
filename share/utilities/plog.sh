@@ -49,11 +49,11 @@ plog() {
     local message="$@"
 
     if [ ! -z "${verbose_option}" ] && [ ! -z "${VERBOSE}" ]; then
-        echo -e "[${COLOR_GREEN}>${COLOR_NONE}] ${message}" >&42
+        colorize "[<green>&gt;</green>] ${message}" >&42
         return
     fi
 
     if [ -z "${verbose_option}" ]; then
-        echo -e "[${COLOR_GREEN}>${COLOR_NONE}] ${message}" >&42
+        colorize "[<green>&gt;</green>] ${message}" >&42
     fi
 }
