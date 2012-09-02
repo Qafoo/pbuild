@@ -130,7 +130,7 @@ UTILITIES_DIR="${SHARED_DIR}/utilities"
 PBUILD=""
 
 # Source vendor libraries
-source "${VENDOR_DIR}/colorizer/lib/colorizer.sh"
+source "${VENDOR_DIR}/colorizer/Library/colorizer.sh"
 
 ##
 # Determine default makeopts specifying multiple processes to use
