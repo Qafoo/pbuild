@@ -1,0 +1,48 @@
+##
+# Execute further operations after the current php version has been installed.
+#
+# These operations may include installing pear and pecl packages for the
+# current version, manipulating the configuration file or doing anything else
+# necessary in conjunction with this php install.
+#
+# If you need to execute binaries from the just installed php version take into
+# account, that they may not be within the search path. Therefore always call
+# them with their full path.
+#
+# You may use the convinience wrapper pbin, which will call arbitrary
+# executables from inside the just installed php version. For often used
+# commands aliases exist as well: pphp, ppear, ppecl.
+#
+# The directory the new php version has been installed to can be reached using
+# ${P} or ${D}, the directory searched for the php.ini is available using ${C}.
+#
+# The ${S} variable still points to the source tree, which php has been
+# installed from. This is useful if certain files should be copied over from
+# there, like the config samples for example.
+##
+src_post_install() {
+    # We only want to install cli tools currently
+    if [ "$PT" != "cli" ]; then
+        return
+    fi
+
+    ppear upgrade
+
+    ppear install --alldeps pear/php_codesniffer
+
+    ppear channel-discover pear.phpdoc.org
+    ppear install --alldeps pear.phpdoc.org/PhpDocumentor-alpha
+
+    ppear channel-update doc.php.net
+    ppear install --alldeps doc.php.net/pman
+
+    ppear channel-discover components.ez.no
+    ppear channel-discover pear.phpunit.de
+    ppear install phpunit/phploc
+
+    ppear channel-discover pear.pdepend.org
+    ppear install pdepend/PHP_Depend-beta
+
+    ppear channel-discover pear.netpirates.net
+    ppear install theseer/Autoload
+}
