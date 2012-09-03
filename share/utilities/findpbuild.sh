@@ -42,7 +42,7 @@
 # @return realpath of the pbuild
 ##
 findpbuild() {
-    local pattern=$1
+    local pattern="${1}"
 
     if [ -f "${pattern}" ]; then
         echo "$(readlink -f "${pattern}")"
