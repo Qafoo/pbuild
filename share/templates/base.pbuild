@@ -97,7 +97,7 @@ src_install() {
     # to be fine ;)
     local filename=""
     for filename in "${D}"/{bin,sbin}/*.dSYM; do
-        if [ -e "${filename}" ]; then
+        if [ -f "${filename}" ]; then
             # We only symlink instead of move here, because the php-config
             # information still points to the original executable, therefore we
             # do not want to remove it
@@ -156,7 +156,7 @@ php_enable() {
             # Link all executables from bin/sbin, which don't have the .dSYM
             # suffix
             for executable in "${S}"/{bin,sbin}/*; do
-                if [ -e "${executable}" ] && [ "${executable%\.dSYM}" = "${executable}" ]; then
+                if [ -f "${executable}" ] && [ "${executable%\.dSYM}" = "${executable}" ]; then
                     plink -f "${executable}"
                 fi
             done
