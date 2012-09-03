@@ -1,3 +1,5 @@
+pinclude "templates/php-base"
+
 ##
 # Configure the php version before the compile phase
 #
