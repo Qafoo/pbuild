@@ -22,7 +22,7 @@
 ##
 src_post_install() {
     # Copy default php.ini if there is none existing yet
-    if [ ! -e "${C}" ]; then
+    if [ ! -e "${C}/php.ini" ]; then
         pmkdir "${C}"
         cp "${S}"/php-*"/php.ini-development" "${C}/php.ini"
     fi
@@ -51,4 +51,11 @@ src_post_install() {
 
     ppear channel-discover pear.netpirates.net
     ppear install theseer/Autoload
+    
+    # Copy default fpm config if we are in a fpm install and it isn't present
+    # yet
+    if [ "${PT}" = "fpm" ] && [ ! -e "${C}/php-fpm.conf" ]; then
+        pmkdir "${C}"
+        cp "${D}/etc/php-fpm.conf.default" "${C}/php-fpm.conf"
+    fi
 }
