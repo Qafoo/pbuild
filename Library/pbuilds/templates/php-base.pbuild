@@ -21,10 +21,20 @@
 # there, like the config samples for example.
 ##
 src_post_install() {
+    # Create configuration directory
+    if [ ! -e "${C}" ]; then
+        pmkdir "${C}"
+    fi
+
     # Copy default php.ini if there is none existing yet
     if [ ! -e "${C}/php.ini" ]; then
-        pmkdir "${C}"
         cp "${S}"/php-*"/php.ini-development" "${C}/php.ini"
+    fi
+
+    # Copy default fpm config if we are in a fpm install and it isn't present
+    # yet
+    if [ "${PT}" = "fpm" ] && [ ! -e "${C}/php-fpm.conf" ]; then
+        cp "${D}/etc/php-fpm.conf.default" "${C}/php-fpm.conf"
     fi
     
     # We only want to install cli tools currently
@@ -52,10 +62,4 @@ src_post_install() {
     ppear channel-discover pear.netpirates.net
     ppear install theseer/Autoload
     
-    # Copy default fpm config if we are in a fpm install and it isn't present
-    # yet
-    if [ "${PT}" = "fpm" ] && [ ! -e "${C}/php-fpm.conf" ]; then
-        pmkdir "${C}"
-        cp "${D}/etc/php-fpm.conf.default" "${C}/php-fpm.conf"
-    fi
 }
