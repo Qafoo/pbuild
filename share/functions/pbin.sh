@@ -59,6 +59,12 @@ ppear() {
     fi
     pbin pear -q "${@}"
 }
+ppear-channel() {
+    set +o errexit
+    pbin pear channel-discover "${1}"
+    set -o errexit
+    pbin pear channel-update "${1}"
+}
 ppecl() {
     if [ "${1}" = "install" ]; then
         eval "plog \"Installing pecl package: \${${#}}\""
