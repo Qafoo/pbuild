@@ -36,30 +36,51 @@ src_post_install() {
     if [ "${PT}" = "fpm" ] && [ ! -e "${C}/php-fpm.conf" ]; then
         cp "${D}/etc/php-fpm.conf.default" "${C}/php-fpm.conf"
     fi
+
+    # Establish link from conf dir php-fpm.conf to
+    # INSTALL_DIR/etc/php-fpm.conf, as php does not adhere to the given config
+    # path yet
+    if [ "${PT}" = "fpm" ]; then
+        ln -s "${C}/php-fpm.conf" "${D}/etc/php-fpm.conf"
+    fi
     
     # We only want to install cli tools currently
     if [ "$PT" != "cli" ]; then
         return
     fi
 
+    local pearrc_backup
+    if [ -f "${HOME}/.pearrc" ]; then
+        pearrc_backup="${HOME}/.pearrc.pbuild.${RANDOM}"
+        mv "${HOME}/.pearrc" "${pearrc_backup}"
+    fi
+
     ppear upgrade
+    ppear config-set auto_discover 1
 
     ppear install --alldeps pear/php_codesniffer
 
-    ppear channel-discover pear.phpdoc.org
-    ppear install --alldeps pear.phpdoc.org/PhpDocumentor-alpha
+    ppear-channel pear.phpdoc.org
+    ppear install --force --alldeps pear.phpdoc.org/PhpDocumentor-alpha
 
-    ppear channel-update doc.php.net
-    ppear install --alldeps doc.php.net/pman
+    ppear-channel doc.php.net
+    ppear install --force --alldeps doc.php.net/pman
 
-    ppear channel-discover components.ez.no
-    ppear channel-discover pear.phpunit.de
-    ppear install phpunit/phploc
+    ppear-channel components.ez.no
+    ppear-channel pear.phpunit.de
+    ppear install --force phpunit/phploc
+    ppear install --force --alldeps phpunit/phpunit
 
-    ppear channel-discover pear.pdepend.org
-    ppear install pdepend/PHP_Depend-beta
+    ppear-channel pear.pdepend.org
+    ppear install --force pdepend/PHP_Depend-beta
 
-    ppear channel-discover pear.netpirates.net
-    ppear install theseer/Autoload
-    
+    ppear-channel pear.netpirates.net
+    ppear install --force theseer/Autoload
+
+    if [ ! -z "${pearrc_backup}" ]; then
+        mv "${pearrc_backup}" "${HOME}/.pearrc"
+    fi
+
+    wget http://getcomposer.org/composer.phar -O "${P}/bin/composer.phar"
+    ln -s "${P}/bin/composer.phar" "${P}/bin/composer"
 }
