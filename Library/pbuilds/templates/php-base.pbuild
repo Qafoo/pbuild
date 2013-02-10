@@ -82,5 +82,6 @@ src_post_install() {
     fi
 
     wget http://getcomposer.org/composer.phar -O "${P}/bin/composer.phar"
+    chmod u+x "${P}/bin/composer.phar"
     ln -s "${P}/bin/composer.phar" "${P}/bin/composer"
 }
