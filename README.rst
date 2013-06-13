@@ -215,17 +215,100 @@ creates a mostly default php build of the according version::
 Step 3: Letting **pBuild** work its magic
 -----------------------------------------
 
+After a ``.pbuild`` has been defined actions can be called upon it, using the
+``pbuild`` executable::
+
+    $ pbuild install php-5.4.16
+
+If no action is specified ``enable`` is chosen as default. Calling ``pbuild``
+with the ``-h`` option provides a detailed description of how the utillity can
+be used::
+
+    pbuild 1.0 (c) Jakob Westhoff
+    Usage: pbuild [-h][-v] [<action>] [<pbuild-template>]
+
+    The following actions are available:
+
+    list:      Show a list of php version for which pbuilds exist
+    download:  Download the needed archive for the given pbuild
+    compile:   Compile the given pbuild and store it's build result inside the
+               packages directory
+    install:   Install the given pbuild to the specified php directory
+    enable:    Enable the given pbuild to be available to the system
+    disable:   Disable the given pbuild again, removing all linked entries inside
+               the system
+    clean:     Remove all previously created data for this pbuild (archive,
+               build, install, link)
+
+    Default: enable
+    If no action is specified the enable action is automatically assumed.
+
+    Most of those actions depend on each other and are therefore executed in
+    a given order. (e.g. the enable action will automatically trigger download,
+    compile and install as a prerequisite if necessary.) The pbuild system is
+    capable of determining if certain steps need to be executed again or if all
+    relevant information are available from a previous run.
+
+    pbuild-templates can either be addressed by their canonical path or simply
+    by there name. A quite inteligent lookup system will try to find the one you
+    have been looking for.
+
+    If neither an action nor a pbuild-template is specified a list of all
+    available pbuilds from the pbuild directory is printed.
+
+The tool automatically determines which steps/dependencies need to be
+fullfilled in order to acomplish the selected action.
+
+For example if a ``.pbuild`` has never been build before and is supposed to be
+``enabled`` the following actions will be automatically executed in the correct
+order:
+
+1. ``download``
+2. ``compile``
+3. ``install``
+4. ``enable``
+
+No worries **pbuild** will tell you exactly what is going to happen before
+actually doing anything::
+
+    pbuild 1.0 (c) Jakob Westhoff
+    [>] Using pbuild '/Users/jakob/devel/shell/pbuild/Library/pbuilds/php-5.4.16.pbuild'.
+    [>] The following build steps will be executed in order: download compile install enable
+    [>] The following incarnations will be build: cli fpm.
+    [?] Should I commence the operation? [Y/n]
+
+Once you acknowledge the operation the magic starts to happen. In the example
+above **pbuild** will automatically download, configure, compile, install and
+link the defined php version into your system. It will be build in a variety of
+different incarnations. In this example a CLI as well as an FPM version will be
+build. You can learn more about the build incarnation capabilities in the
+chapter `Build Incarnations`_
+
+By default all necessary executables and files will be linked to
+``/usr/local``. For information about changeing this path prefix see the
+section `Overwriting Default Configuration`.
+
+After the **pbuild** has completed its work you should be able to simply
+execute ``php``, ``pear``, ``pecl`` and everything else related to your build
+php version. Of course this only works if ``/usr/local`` is in your current
+``PATH``.
+
 Step 4: Changing the ``php.ini`` of a certain Version
 ------------------------------------------------------
 
 Switching between different PHP-Versions
 ========================================
 
+Build Incarnations
+==================
+
 More sophisticated `.pbuild` files
 ==================================
 
 Including other templates
 -------------------------
+
+
 
 Overwriting Default Configuration
 =================================
