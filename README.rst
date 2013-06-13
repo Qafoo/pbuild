@@ -1,8 +1,9 @@
+======
 pBuild 
 ======
 
 What's it all about
--------------------
+===================
 
 **pBuild** is a utillity written in `bash`__-Script, which helps you to compile,
 install and manage multiple `PHP`__-Versions from source.
@@ -16,7 +17,7 @@ PHP-Versions on one system. Switching between versions is as easy, as building
 different incarnations, like for the commandline, fcgi and the fpm interface.
 
 Motivation
-----------
+==========
 
 **pBuild** has been created to satisfy the need for multiple PHP-Versions, with
 different configurations on a development system. For testing compatibility as
@@ -26,7 +27,7 @@ Using default system packages was no solution, either to development on MacOs,
 or different build-flags needed in contrast to the distributed packages.
 
 Name and basic idea
--------------------
+===================
 
 The name **pBuild** is based on `Gentoo`__'s Portage package manager, which
 uses so called *ebuilds* to manage the compilation and installation of software
@@ -45,7 +46,7 @@ use case is the *configure* step, which configures with which features PHP
 should be build.
 
 Directory/File-Structure
-------------------------
+========================
 
 **pBuild** uses a predefined file and directory structure, with looks like
 this::
@@ -73,7 +74,7 @@ Documentation/bash_completion:
 
 Documentation/examples:
     An empty `.pbuild` file with all posible build-step functions, which simply
-    do nothing. All of those methods are documented in detail, with all
+    does nothing. All of those methods are documented in detail, with all
     available variables and informations under which conditions the
     corresponding function will be called.
 
@@ -95,17 +96,17 @@ vendor:
     Certain third-party scripts used by **pBuild**
 
 First steps
------------
+===========
 
 The easiest way to understand how **pBuild** works is by following this step by
 step guide to installing a PHP version:
 
 Step 1: Installing **pBuild**
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------
 
 To install **pBuild** simply checkout it's github repository::
 
-    git clone @TODO: INSERT URL
+    git clone https://github.com/Qafoo/pbuild
 
 Either link the ``bin/pbuild`` file to a directory inside your ``PATH`` or
 simply add ``bin/`` to your ``PATH`` variable.
@@ -118,16 +119,113 @@ Now you should be able to call ``pbuild`` as well as having TAB-completion for
 it.
 
 Step 2: Creating a simple ``.pbuild``-File
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------------------------
+
+For each PHP-Version you want to install/compile a ``.pbuild`` files needs to
+be created. This file needs to contain all necessary configuration for your
+custom php build. A ``.pbuild`` file consists of bash-functions, with defined
+names, which represent different steps of the build process. Each function has
+a reasonable default implementation. Therefore only specialized parts of
+certain build need to be overwritten.
+
+The following build step functions are executed in the given order:
+
+- ``pkg_fetch``: Fetch the possibly compressed source of the configured
+  version.
+- ``pkg_unpack``: Unpack the fetched archive.
+- ``src_prepare``: Prepare the unpacked source (Applying patches, Running
+  autoconf, ...).
+- ``src_configure``: Running the ``./configure`` step with appropriate flags
+  and configuration in order to define how to build the defined version.
+- ``src_compile``: Compile the configured source tree.
+- ``src_install``: Take all steps necessary to install the compiled version
+  into the system.
+- ``src_post_install``: Execute further operations after php has been
+  installed. This step may install additional packages using pear and/or pecl,
+  for the just build version.
+- ``php_enable``: Executed once the installed php version should be enabled
+  (linked into the path)
+
+
+Installing vs. Enabling
+^^^^^^^^^^^^^^^^^^^^^^^
+
+**pbuild** differentiates between the *install* action of a build php version
+and an *enable* action. **pbuild** installs each compiled php version initially
+to an internal directory, which lives inside the ``Library`` folder. Utilizing
+this technique multiple php version can easily be installed in parallel.
+**pbuild** takes care of managing all the installed versions, directories and
+downloaded packages.
+
+Once the tool is ordered to ``enable`` a certain version it links all necessary
+parts of the corresponding php installation into the ``PATH`` of your system.
+After *enabling* a call to ``php`` from your commandline for example will
+execute the correct version.
+
+.. note:: The target path for the ``enable`` action may of course be
+    configured. See `Overwriting Default Configuration`_ for details.
+
+``./configure`` your PHP
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+A custom build php-version often needs certain specialized configure flags.
+Those are usually provided during a call to the autotools ``./configure``
+script. In order to provide customized configure-flags to the php version build
+by **pbuild**, the ``src_configure`` is overridden, to provide user based flags
+to the ``pconfigure`` macro.
+
+``pconfigure`` may be used exactly like the usual ``./configure``. Internally
+however this function adds certain configure flags related to the currently
+build incarnation (cli, fcgi, fpm, ...), as well as certain paths, like config
+path, install path and so on. Furthermore ``pconfigure`` knows about the
+directory structure used by **pbuild**. Therefore it is capable of correctly
+switching directories and executing everything in the right place without
+further user interaction.
+
+A simple ``.pbuild`` example
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The following ``.pbuild`` is stored as ``Library/pbuilds/php-5.4.16``. It
+creates a mostly default php build of the according version::
+
+    ##
+    # Configure the php version before the compile phase
+    #
+    # The directory containing the possible patched source tree from the
+    # 'src_prepare' phase is accessible using ${S} as well as ${D}.
+    #
+    # Instead of calling configure directly the 'pconfigure' function needs to be
+    # used, as the configure call is slightly modified to contain the correct
+    # install prefix, as well as configuration directories and buildtype
+    # configuration (cgi, cli, …)
+    ##
+    src_configure() {
+        cd "${S}/${PB}"
+        
+        pconfigure \
+            --disable-debug \
+            --enable-pcntl \
+            --enable-mbstring \
+            --enable-bcmath \
+            --with-openssl \
+            --with-zlib=/usr \
+            --with-bz2=/usr \
+    }
 
 Step 3: Letting **pBuild** work its magic
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------------------
 
 Step 4: Changing the ``php.ini`` of a certain Version
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------------------------------
 
 Switching between different PHP-Versions
-----------------------------------------
+========================================
 
 More sophisticated `.pbuild` files
-----------------------------------
+==================================
+
+Including other templates
+-------------------------
+
+Overwriting Default Configuration
+=================================
