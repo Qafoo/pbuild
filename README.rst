@@ -296,6 +296,30 @@ php version. Of course this only works if ``/usr/local`` is in your current
 Step 4: Changing the ``php.ini`` of a certain Version
 ------------------------------------------------------
 
+After having installed a pbp version using ``pbuild`` you most likely want to
+supply it with a specialized ``php.ini``. Something like for example a valid
+timezone should always be configured.
+
+**pbuild**  automatically configures your build php version with a custome
+``php.ini`` directory. Using this technique each version as well as each build
+incarnation can be given its own dedicated configuration.
+
+The ``php.ini`` configurations will be stored in ``/usr/local/php/etc``. The
+path is followed by the build php version postfixed with the incarnation it
+belongs to. With regards to the example above the following two ``php.ini``
+would be available to configure the installed php version:
+
+- ``/usr/local/etc/php/php-5.4.16_cli/php.ini``
+- ``/usr/local/etc/php/php-5.4.16_fpm/php.ini``
+
+Upon the first installed the distributed example configuration will
+automatically be stored there. Once you made your changes reinstalling an
+already configured php version will just utilize the ``php.ini`` already there.
+
+For selecting another configuration directory base path see `Overwriting
+Default Configuration`_
+
+
 Switching between different PHP-Versions
 ========================================
 
