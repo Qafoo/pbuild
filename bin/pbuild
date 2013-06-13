@@ -117,10 +117,16 @@ UTILITIES_DIR="${SHARED_DIR}/utilities"
 : ${BUILD_INCARNATIONS:="cli fpm"}
 
 ##
-# Path of the config file which is capable of overriding all the above made
-# configuration
+# Path of the global config file which is capable of overriding all the above
+# made configuration
 ##
 : ${CONFIG_FILE:="/etc/pbuild"}
+
+##
+# Path of the global config file which is capable of overriding all the above
+# made configuration
+##
+: ${USER_CONFIG_FILE:="${HOME}/.pbuildrc"}
 
 ##
 # Variable holding the path to the processed pbuild file. As it is used by plog
