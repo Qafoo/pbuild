@@ -488,8 +488,31 @@ value::
     
     ...
 
- If the configuration should not be global, but specific to the current user,
- just store the file inside the corresponding homedir as ``.pbuildrc``. If both
- files exist, both configurations will be automatically merged. The user
- configuration has a higher priority then the global configuration and is
- therefore capable of overwriting each of the global settings again.
+If the configuration should not be global, but specific to the current user,
+just store the file inside the corresponding homedir as ``.pbuildrc``. If both
+files exist, both configurations will be automatically merged. The user
+configuration has a higher priority then the global configuration and is
+therefore capable of overwriting each of the global settings again.
+
+Call-by-Call Configuration
+--------------------------
+
+A small subset of the available configuration options may be overwritten
+dynamically during the calltime of the ``pbuild`` executable:
+
+- ``BUILD_INCARNATIONS``
+- ``PHP_INSTALL_PREFIX``
+- ``PHP_CONFIG_DIR``
+
+Those config options can be set as an evironment variable before or during
+execution::
+
+    BUILD_INCARNATIONS="fgi cli"
+    pbuild install php-5.4.16
+
+Alternative (one call)::
+
+    BUILD_INCARNATIONS="fgi cli" pbuild install php-5.4.16
+
+.. note:: This environment variables overwrite the global as well as the user
+    configuration
