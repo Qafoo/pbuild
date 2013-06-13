@@ -80,41 +80,12 @@ PACKAGE_DIR="${APP_DIR}/packages"
 BUILD_DIR="${APP_DIR}/build"
 PHP_DIR="${APP_DIR}/php"
 
-# Where should the all the php.ini directories be stored?
-: ${PHP_CONFIG_DIR:="/usr/local/etc/php"}
-# Where should all the executables be linked if a version is enabled=
-: ${PHP_INSTALL_PREFIX:="/usr/local"}
-
 VENDOR_DIR="${BASE_DIR}/vendor"
 SHARED_DIR="${BASE_DIR}/share"
 FUNCTIONS_DIR="${SHARED_DIR}/functions"
 ACTIONS_DIR="${SHARED_DIR}/actions"
 TEMPLATES_DIR="${SHARED_DIR}/templates"
 UTILITIES_DIR="${SHARED_DIR}/utilities"
-
-##
-# Different incarnations of the package to be build
-#
-# The default is a cli version, plus an fpm-fcgi version.
-# You may change this to your linking from within the config file if you want.
-# simply provide a comma seperated list with incarnations to build.
-#
-# You may decide not to build the cli incarnation. This may lead however to
-# quite strange problems, as the cli version is used for example to install
-# pear packages and stuff.
-#
-# The order provided by this configuration determines the build and activation
-# order as well. Therefore cli should always be put first, in order to be
-# available for all later on relevant configuration and installation.
-#
-# Available incarnations are:
-# - cli
-# - fcgi
-# - fpm
-# - apxs
-# - apxs2
-##
-: ${BUILD_INCARNATIONS:="cli fpm"}
 
 ##
 # Path of the global config file which is capable of overriding all the above
@@ -190,6 +161,45 @@ show_usage() {
 }
 
 ##
+# Backup the contents of the given variable if it is defined.
+#
+# The variable will be backed up as __${variable}_BACKUP__
+#
+# `pop_variable` may be used to restore the stored data again.
+#
+# @param variable
+##
+push_variable() {
+    local variable="${1}"
+
+    eval "local contents=\"\${${variable}}\""
+
+    if [ ! -z "${contents}" ]; then
+        eval "__${variable}_BACKUP__='${contents}'"
+    fi
+}
+
+##
+# Restore the contents of the given variable if it has been backed up before.
+#
+# The variable will be read from __${variable}_BACKUP__
+#
+# `push_variable` may be used to backup the variable inthe first place.
+#
+# @param variable
+##
+pop_variable() {
+    local variable="${1}"
+
+    eval "local contents=\"\${__${variable}_BACKUP__}\""
+
+    if [ ! -z "${contents}" ]; then
+        eval "${variable}='${contents}'"
+        eval "__${variable}_BACKUP__="
+    fi
+}
+
+##
 # Source all files in the given directory.
 #
 # The optional second argument can be used to specify a file extension of the
@@ -226,12 +236,64 @@ safe_source() {
 }
 
 ##
+# Make sure that dynamic config variables may not be overridden
+##
+push_variable "BUILD_INCARNATIONS"
+push_variable "PHP_CONFIG_DIR"
+push_variable "PHP_INSTALL_PREFIX"
+
+##
+# Dynamic option default values
+##
+
+# Where should the all the php.ini directories be stored?
+: ${PHP_CONFIG_DIR:="/usr/local/etc/php"}
+# Where should all the executables be linked if a version is enabled=
+: ${PHP_INSTALL_PREFIX:="/usr/local"}
+
+##
+# Different incarnations of the package to be build
+#
+# The default is a cli version, plus an fpm-fcgi version.
+# You may change this to your linking from within the config file if you want.
+# simply provide a comma seperated list with incarnations to build.
+#
+# You may decide not to build the cli incarnation. This may lead however to
+# quite strange problems, as the cli version is used for example to install
+# pear packages and stuff.
+#
+# The order provided by this configuration determines the build and activation
+# order as well. Therefore cli should always be put first, in order to be
+# available for all later on relevant configuration and installation.
+#
+# Available incarnations are:
+# - cli
+# - fcgi
+# - fpm
+# - apxs
+# - apxs2
+##
+: ${BUILD_INCARNATIONS:="cli fpm"}
+
+##
 # Import the configuration file if it does exist.
 #
 # This will overwrite all of the default configuration if there is a substitute
 # inside the config file.
 ##
 safe_source "${CONFIG_FILE}"
+
+##
+# User Configuration may overwrite global configuration :)
+##
+safe_source "${USER_CONFIG_FILE}"
+
+##
+# Make sure that dynamic config variables may not be overridden
+##
+pop_variable "BUILD_INCARNATIONS"
+pop_variable "PHP_CONFIG_DIR"
+pop_variable "PHP_INSTALL_PREFIX"
 
 ##
 # Source all the needed action, function, template and utility code
