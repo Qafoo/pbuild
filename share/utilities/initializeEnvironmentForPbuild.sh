@@ -42,7 +42,7 @@
 initializeEnvironmentForPbuild() {
     local pbuild="$1"
 
-    local regexp='s@^\([^-]\+\)-\(\([0-9]\+\.\)*[0-9]\+\)-\?\(.*\)$@'
+    local regexp='s@^\([^-]\+\)-\(\([0-9]\+\.\)*[0-9]\+\(RC[0-9]\)\?\)-\?\(.*\)$@'
 
     PBUILD="$pbuild"
 
