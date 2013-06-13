@@ -333,6 +333,14 @@ executables.
 Therefore having multiple versions, or even differently configured builds of the
 same version on your system, as well as switching between them is easy as pie.
 
+Same version, different Configuration
+-------------------------------------
+
+To build multiple configurations of the same php version, you may simply attach
+a buildname to the pbuild filename:
+``php-5.4.16-some_arbitrary_build_name.pbuild``
+
+
 Build Incarnations
 ==================
 
