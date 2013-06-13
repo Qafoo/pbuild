@@ -447,6 +447,49 @@ A structural example of using ``pinclude`` does look like this::
 
     ...
 
-
 Overwriting Default Configuration
 =================================
+
+**pbuild** assumes a lot of different configuration settings. Eventhough these
+are mostly sane settings, there are a lot of environments and situations in
+which you might want to override those settings.
+
+The following settings may be overriden:
+
+- ``PBUILD_DIR``: Directory containing the ``.pbuild`` files. (**Default**: ``Library/pbuilds``)
+- ``PACKAGE_DIR``: Directory to store downloaded packages. (**Default**: ``Library/packages``)
+- ``BUILD_DIR``: Directory used to utilize as temporary build folder for each
+  php version. (**Default**: ``Library/build``)
+- ``PHP_DIR``: Directory containing build and installed php versions, before
+  they are activated. (**Default**: ``Library/php``)
+- ``PHP_CONFIG_DIR``: Prefix for all stored ``php.ini`` config files.
+  (**Default**: ``/usr/local/etc/php``)
+- ``PHP_INSTALL_PREFIX``: Prefix used to link enabled php versions to.
+  (**Default**: ``/usr/local``)
+- ``BUILD_INCARNATIONS``: Incarnations to build by default. (**Default**: ``cli fpm``)
+
+All of those options (mind the all uppercase names) may be overwritten on
+a global, as well as a user level.
+
+Globally an ``/etc/pbuild`` file may be created, which simply contains one or
+more of the before mentioned options followed by an equalsign and the desired
+value::
+
+    # Comment lines may be created starting with a hash sign
+    # Empty lines and stuff are of cause valid as well
+    PBUILD_DIR="/some/other/absolute/path/to/a/build/directory"
+    
+    # Expansion of environment variables may be utilized using a dollar and
+    # curly braces
+    PHP_INSTALL_PREFIX="${HOME}/php"
+
+    # Multiple build incarnations are specified using a space separated list
+    BUILD_INCARNATIONS="fpm fcgi apxs2 cli"
+    
+    ...
+
+ If the configuration should not be global, but specific to the current user,
+ just store the file inside the corresponding homedir as ``.pbuildrc``. If both
+ files exist, both configurations will be automatically merged. The user
+ configuration has a higher priority then the global configuration and is
+ therefore capable of overwriting each of the global settings again.
