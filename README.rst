@@ -344,6 +344,48 @@ a buildname to the pbuild filename:
 Build Incarnations
 ==================
 
+PHP comes in different flavors, as it may be used in different environments.
+Every php version may be build for different use cases supporting different
+connectivity features. Some of those may be combined in one executable. For
+most of them this is however not possible. **pbuild** calls this different
+builds *incarnations*.
+
+Currently **pbuild** knows about the following incarnations:
+
+- ``cli``
+- ``fpm``
+- ``fcgi``
+- ``apxs``
+- ``apxs2``
+
+One or more of those incarnations may be selected to be build. **pbuild** will
+automatically inject the correct configuration flags into its call to
+``./configure`` in order to build the appropriate incarnations. As described in
+the chapter `Step 4: Changing the php.ini of a certain Version`_ each
+incarnation has it's own ``php.ini`` folder, which allows very specific
+configuration of the installed environment. Unfortunately this means, that the
+compile step is repeated once for every build incarnation.
+
+By default the incarnations ``cli`` as well as ``fpm`` will be build, as those
+the most commonly used environments these days. Of course it is possible to
+overwrite this configuration. It is possible to either configure this setting
+on a call by call basis to ``pbuild`` by simply prepending the
+``BUILD_INCARNATIONS`` variable, followed by a space separated list of
+incarnations to build, or in a more persistent manner using a static
+configuration file. See ``Overwriting Default Configuration`` for details about
+the second way.
+
+An example for a dynamic selection of incarnations during a call to ``pbuild``
+looks something like this::
+
+    BUILD_INCARNATIONS="fcgi cli apxs2" pbbuild enable php-5.4.16-my_build_name
+
+The exampe above would build the ``.pbuild`` file
+``php-5.4.16-my_build_name.pbuild`` to be used with *fcgi*, *apache2* as well
+as on the commandline (*cli*). Furthermore after building the version will
+directly be enabled by linking the appropriate files.
+
+
 More sophisticated `.pbuild` files
 ==================================
 
