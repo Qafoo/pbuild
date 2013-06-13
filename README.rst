@@ -389,9 +389,63 @@ directly be enabled by linking the appropriate files.
 More sophisticated `.pbuild` files
 ==================================
 
+As described before ``.pbuild`` are a quite sophisticated way of configuring
+a build. Those of you who have used Gentoo linux at some time should already be
+familiar with the basic concept of this ebuild inspired system. The possibility
+to overwrite each step of the build process, allows to create even the most
+complex processing templates.
+
+The ``Documentation`` folder houses detailed examples of all build steps, which
+may be overwritten. Inside each function certain special variables, like
+``${PB}``, ``${S}`` and ``${D}`` are available. The meaning and usage of those
+variables is documented in each docblock of each of the build step functions.
+
+Convinience Functions
+---------------------
+
+In order to automatically handle often used tasks within those different build
+steps a lot of convinience functions are available. Those functions are always
+prefixed with the lower case letter ``p``. In most situations they are named
+after their shell counterpart, like ``ppear``, ``pphp``, ``pconfigure``,
+``pmkdir`` and ``pmake``. As those functions take into account the special
+nature of the build environment the steps are executed in, they can easy your
+life tremendously. Everytime an operation may be executed either manually, or
+using those convinience functions, the convinience functions should be used, as
+they might incorparate a certain amount of magic regarding the build process.
+
+There are functions, which MUST be used instead of their counterparts, as their
+special handling is essential to the build process. Those functions currently are:
+
+- ``pconfigure``
+- ``pmake``
+
+A detailed documentation of all of those functions can be found in the
+``Documents/Functions`` folder in form of generated API documentation.
+
+
 Including other templates
 -------------------------
 
+If you want to *inherit* from other templates utilize the ``pinclude``
+function. It will try to locate the selected ``.pbuild`` file exactly the same
+way the ``pbuild`` executable does. A call to ``pinclude`` needs to be the
+first call inside your template. It is issued outside of any other function.
+After including another ``.pbuild`` as a basis you may overwrite all the
+relevant parts of it as already described.
+
+.. note:: A call to a *parent* implementation from within an overwritten
+    function is currently not possible. If enough people have a use case for
+    this I might implement a feature like this in the future.
+
+A structural example of using ``pinclude`` does look like this::
+
+    pinclude "some/folder/below/pbuilds/some_template.pbuild"
+
+    src_configure() {
+        ...
+    }
+
+    ...
 
 
 Overwriting Default Configuration
