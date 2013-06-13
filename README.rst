@@ -323,6 +323,16 @@ Default Configuration`_
 Switching between different PHP-Versions
 ========================================
 
+Once you have compiled and installed multiple php versions you may easily
+switch between those versions, by simply calling ``pbuild <desired php
+version``. (alternatively: ``pbuild enable <desired php version>``). **pbuild**
+will automatically detect that you already build and installed the selected
+version and simply switch over all symlinks in your path to the desired
+executables.
+
+Therefore having multiple versions, or even differently configured builds of the
+same version on your system, as well as switching between them is easy as pie.
+
 Build Incarnations
 ==================
 
