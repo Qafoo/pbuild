@@ -2,6 +2,9 @@
 pBuild 
 ======
 
+.. contents:: Table of Contents
+    :depth: 2
+
 What's it all about
 ===================
 
