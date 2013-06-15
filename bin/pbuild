@@ -172,7 +172,9 @@ show_usage() {
 push_variable() {
     local variable="${1}"
 
+    set +u
     eval "local contents=\"\${${variable}}\""
+    set -u
 
     if [ ! -z "${contents}" ]; then
         eval "__${variable}_BACKUP__='${contents}'"
@@ -191,7 +193,9 @@ push_variable() {
 pop_variable() {
     local variable="${1}"
 
+    set +u
     eval "local contents=\"\${__${variable}_BACKUP__}\""
+    set -u
 
     if [ ! -z "${contents}" ]; then
         eval "${variable}='${contents}'"

@@ -1,6 +1,3 @@
 [submodule "vendor/colorizer"]
 	path = vendor/colorizer
 	url = https://github.com/jakobwesthoff/colorizer.git
-[submodule "Library/pbuilds"]
-	path = Library/pbuilds
-	url = https://github.com/Qafoo/pbuild-templates.git
