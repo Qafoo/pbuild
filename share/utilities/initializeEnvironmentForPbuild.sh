@@ -34,6 +34,7 @@
 # PB: name of the pbuild (without extension and path)
 # PN: name of the "product" (usually php)
 # PV: version string of the pbuild
+# PP: product name plus version string (without the buildname)
 # PE: extra buildname of the pbuild (everything that comes after a minus behind
 #     the version string)
 #
@@ -50,5 +51,6 @@ initializeEnvironmentForPbuild() {
 
     PN="$(echo "$PB"|sed -e "${regexp}\\1@")"
     PV="$(echo "$PB"|sed -e "${regexp}\\2@")"
+    PP="${PN}-${PV}"
     PE="$(echo "$PB"|sed -e "${regexp}\\4@")"
 }

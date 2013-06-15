@@ -56,7 +56,7 @@ src_prepare() {
 # configuration (cgi, cli, …)
 ##
 src_configure() {
-    cd "${S}/${PB}"
+    cd "${S}/${PP}"
     pconfigure
 }
 
@@ -71,7 +71,7 @@ src_configure() {
 # pbuild configuration file, as well as doing some other black magic.
 ##
 src_compile() {
-    cd "${S}/${PB}"
+    cd "${S}/${PP}"
     pmake
 }
 
@@ -89,7 +89,7 @@ src_compile() {
 # as pmake does some black magic to ease your life.
 ##
 src_install() {
-    cd "${S}/${PB}"
+    cd "${S}/${PP}"
     pmake install
 
     # Fix some filename inconvieniences on MacOS. Some of the executables get
