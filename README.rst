@@ -400,8 +400,16 @@ complex processing templates.
 
 The ``Documentation`` folder houses detailed examples of all build steps, which
 may be overwritten. Inside each function certain special variables, like
-``${PB}``, ``${S}`` and ``${D}`` are available. The meaning and usage of those
+``${S}`` and ``${D}`` are available. The meaning and usage of those
 variables is documented in each docblock of each of the build step functions.
+
+- ``PBUILD``: full build path
+- ``PB``: name of the pbuild (without extension and path)
+- ``PN``: name of the "product" (usually php)
+- ``PV``: version string of the pbuild
+- ``PP``: product name plus version string (without the buildname)
+- ``PE``: extra buildname of the pbuild (everything that comes after a minus behind
+    the version string)
 
 Convinience Functions
 ---------------------
