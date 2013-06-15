@@ -408,8 +408,8 @@ variables is documented in each docblock of each of the build step functions.
 - ``PN``: name of the "product" (usually php)
 - ``PV``: version string of the pbuild
 - ``PP``: product name plus version string (without the buildname)
-- ``PE``: extra buildname of the pbuild (everything that comes after a minus behind
-    the version string)
+- ``PE``: extra buildname of the pbuild (everything that comes after a minus
+  behind the version string)
 
 Convinience Functions
 ---------------------
