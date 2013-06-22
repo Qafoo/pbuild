@@ -199,3 +199,33 @@ php_disable() {
         done
     fi
 }
+
+##
+# Prepare the packaging of arbitrary build php versions
+#
+# By default the build php version will be stored under "/opt/php/${PB}_${PT}".
+# This may of course be overwritten, by changing this build step
+#
+# The ${P} as well as ${S} variables will be filled with the folder of the
+# installed PHP version.
+#
+# ${D} will be a temporary directory, which is to be used, to create the file
+# structure, which is needed for building the distribution package.
+##
+php_package_prepare() {
+    pmkdir "${D}/opt/php/${PB}_${PT}"
+    cp -a "${S}/*" "${D}/opt/php/${PB}_${PT}/"
+}
+
+##
+# Package the build php version
+#
+# The ${P} variable will be filled with the folder of the installed PHP version.
+# The ${S} variable will point to the directory, which has been prepared to be
+# packaged
+# The ${D} variable will point to the target directory, where arbitrary
+# packaged files are supposed to be stored
+##
+php_package() {
+    echo "package it ;)"
+}

@@ -38,6 +38,7 @@
 #/ enable:    Enable the given pbuild to be available to the system
 #/ disable:   Disable the given pbuild again, removing all linked entries inside
 #/            the system
+#/ package:   Package the build php version using fpm (Effing package managers)
 #/ clean:     Remove all previously created data for this pbuild (archive,
 #/            build, install, link)
 #/
@@ -79,6 +80,7 @@ PBUILD_DIR="${APP_DIR}/pbuilds"
 PACKAGE_DIR="${APP_DIR}/packages"
 BUILD_DIR="${APP_DIR}/build"
 PHP_DIR="${APP_DIR}/php"
+DISTRIBUTION_DIR="${APP_DIR}/distribution"
 
 VENDOR_DIR="${BASE_DIR}/vendor"
 SHARED_DIR="${BASE_DIR}/share"
@@ -352,7 +354,7 @@ shift "$((OPTIND-1))"
 # The default action
 ACTION="enable"
 case "${1}" in
-    download|compile|install|enable|disable|clean)
+    download|compile|install|enable|disable|package|clean)
         ACTION="${1}"
         shift 1
     ;;
@@ -390,13 +392,20 @@ plog "Using pbuild '${PBUILD}'."
 ##
 # Determine needed possible dependencies for build
 ##
-BUILD_ORDER="download compile install enable"
+BUILD_ORDER="download compile install"
+BUILD_ORDER_FINAL="enable package"
 BUILD_ORDER_SINGLETON="disable clean"
 
 if echo " ${BUILD_ORDER_SINGLETON} "|grep -q " ${ACTION} "; then
     # Singleton should be build. No dependency checking needed
     BUILD_DEPENDENCIES=""
-else
+else 
+    if echo " ${BUILD_ORDER_FINAL} "|grep -q " ${ACTION} "; then
+        # Final build steps need overy "normal" build step as a dependency, but
+        # not each other
+        BUILD_ORDER="${BUILD_ORDER} ${ACTION}"
+    fi
+
     # Cut out all the needed steps until the requested build step is reached
     BUILD_DEPENDENCIES="$(echo " ${BUILD_ORDER} "|sed -e 's@ '"${ACTION}"' .*$@@'|sed -e 's@ \(.*\) $@\1@')"
 fi

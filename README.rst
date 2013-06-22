@@ -472,7 +472,7 @@ The following settings may be overriden:
 - ``BUILD_DIR``: Directory used to utilize as temporary build folder for each
   php version. (**Default**: ``Library/build``)
 - ``PHP_DIR``: Directory containing build and installed php versions, before
-  they are activated. (**Default**: ``Library/php``)
+- ``DISTRIBUTION_DIR``: Directory where build distribution packages are stored. (**Default**: ``Library/distribution``)
 - ``PHP_CONFIG_DIR``: Prefix for all stored ``php.ini`` config files.
   (**Default**: ``/usr/local/etc/php``)
 - ``PHP_INSTALL_PREFIX``: Prefix used to link enabled php versions to.
