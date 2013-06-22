@@ -190,7 +190,7 @@ further user interaction.
 A simple ``.pbuild`` example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The following ``.pbuild`` is stored as ``Library/pbuilds/php-5.4.16``. It
+The following ``.pbuild`` is stored as ``Library/pbuilds/php-5.4.16.pbuild``. It
 creates a mostly default php build of the according version::
 
     ##
@@ -214,7 +214,7 @@ creates a mostly default php build of the according version::
             --enable-bcmath \
             --with-openssl \
             --with-zlib=/usr \
-            --with-bz2=/usr \
+            --with-bz2=/usr
     }
 
 Step 3: Letting **pBuild** work its magic

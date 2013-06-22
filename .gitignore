@@ -2,3 +2,4 @@
 /Library/build
 /Library/packages
 /Library/php
+/Library/pbuilds/*.pbuild
