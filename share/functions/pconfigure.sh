@@ -93,6 +93,7 @@ pconfigure() {
     forcedOptions="${forcedOptions} '--prefix=${PHP_DIR}/${PB}_${PT}'"
     forcedOptions="${forcedOptions} '--with-pear=${PHP_DIR}/${PB}_${PT}'"
     forcedOptions="${forcedOptions} '--with-config-file-path=${PHP_CONFIG_DIR}/${PB}_${PT}'"
+    forcedOptions="${forcedOptions} '--with-config-file-scan-dir=${PHP_CONFIG_DIR}/${PB}_${PT}/conf.d'"
     plog "Running configure: ./configure" "${variableOptions}" "$@" "${forcedOptions}"
 
     if ! eval "./configure" "${variableOptions}" "$@" "${forcedOptions}"; then
