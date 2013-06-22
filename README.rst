@@ -110,6 +110,8 @@ Step 1: Installing **pBuild**
 To install **pBuild** simply checkout it's github repository::
 
     git clone https://github.com/Qafoo/pbuild
+    cd pbuild
+    git submodule update --init
 
 Either link the ``bin/pbuild`` file to a directory inside your ``PATH`` or
 simply add ``bin/`` to your ``PATH`` variable.
